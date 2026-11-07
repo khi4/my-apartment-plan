@@ -7,8 +7,8 @@
 <meta name="plan:units" content="meters">
 <meta name="plan:dimension-convention" content="Clear inside dimension: inside wall face to inside wall face. Walls not included.">
 <meta name="plan:size-order" content="across (left to right as drawn) × deep (top to bottom as drawn)">
-<meta name="plan:wall-thickness-assumed" content="0.15 m, every wall">
-<meta name="plan:coordinate-origin" content="x = 0 at the Master Bedroom's inside left wall face; y = 0 at the top terrace's outer railing; x grows to the right, y grows downward">
+<meta name="plan:wall-thickness" content="0 m: walls are drawn as lines on the inside faces, so every room is exactly its clear inside size">
+<meta name="plan:coordinate-origin" content="x = 0 at the Master Bedroom's left wall line; y = 0 at the Reception's top wall line; x grows to the right, y grows downward; 1 grid square = 1 m">
 <meta name="plan:area-net-indoor" content="104.09 m²">
 <meta name="plan:area-terraces" content="7.47 m²">
 <meta name="plan:area-net-total" content="111.56 m²">
@@ -82,7 +82,9 @@ kbd { font-family: var(--f-mono); font-size: 10.5px; border: 1px solid var(--lin
 #plan.measuring { cursor: crosshair; }
 
 /* Drawing (1 SVG unit = 1 cm) */
-.wall { fill: var(--ink); }
+.wall { fill: none; stroke: var(--ink); stroke-width: 4; }
+.erase { stroke: var(--floor); stroke-width: 9; }
+.glass-mid { stroke: var(--lo); stroke-width: 1; }
 .floor { fill: var(--floor); transition: fill 0.15s ease; }
 .floor.terr { fill: url(#dots); }
 .floor.hot { fill: var(--raise); }
@@ -233,15 +235,15 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     ]
   },
   "coordinateSystem": {
-    "origin": "x = 0 at the inside face of the Master Bedroom's left wall. y = 0 at the outer railing of the top terrace.",
+    "origin": "x = 0 at the Master Bedroom's left wall line. y = 0 at the Reception's top wall line.",
     "x": "Grows to the right of the drawing.",
     "y": "Grows toward the bottom of the drawing.",
     "orientation": "The top of the drawing is plan-up, not compass north. The source plan does not show north.",
     "rectFormat": "[x, y, across, deep] of each room's clear inside area, in meters.",
-    "usedBy": "The rulers, the 1 m grid, the cursor readout and the measuring tool all use these coordinates."
+    "usedBy": "The rulers, the 1 m grid, the furniture, the cursor readout, the clearance lines and the measuring tool all use these coordinates and the same scale."
   },
   "conventions": {
-    "dimension": "Clear inside dimension: from the inside face of one wall to the inside face of the opposite wall. Wall thickness is not included.",
+    "dimension": "Clear inside dimension: from the inside face of one wall to the inside face of the opposite wall. Walls are drawn as lines on those faces, so wall thickness is not part of any size.",
     "openSides": "Where a room opens into another space without a wall, the dimension ends at the line where the neighbouring walls stop. These lines are drawn dashed.",
     "across": "Size from left to right as drawn.",
     "deep": "Size from top to bottom as drawn.",
@@ -252,30 +254,30 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     "Copied every room size from the labels on the developer's plan.",
     "Matched each pair of numbers to the room's longer and shorter side by comparing them with the room's proportions on the source drawing.",
     "Checked each match against neighbours that share a wall line: both bedrooms are 3.54 m deep, the two bathrooms and the kitchen are all 2.34 m deep, and the 3.92 m top terrace runs along the 3.88 m Bedroom 1.",
-    "Placed the rooms in the same arrangement as the source plan, separated by walls of an assumed thickness.",
+    "Placed the rooms in the same arrangement as the source plan, with walls drawn as zero-thickness lines so each room is exactly its inside size and neighbours share one wall line.",
     "Traced door and window positions from the source drawing and estimated their widths.",
     "Computed each area from its two dimensions and added them up for the totals."
   ],
   "assumptions": [
     {
-      "item": "Wall thickness",
-      "value": "0.15 m",
-      "note": "Not given on the plan. Used for every wall, inside and outside, so the overall outer size (about 13.9 × 10.5 m including terraces) is approximate. Room sizes are not affected."
+      "item": "Walls",
+      "value": "Drawn as lines, no thickness",
+      "note": "Each room is drawn at exactly its inside size, and neighbouring rooms share one wall line, so the plan shows usable inside space only. The overall outline (13.38 × 10.23 m) adds up inside sizes; it is not the building's outer size."
     },
     {
-      "item": "Corridor length",
-      "value": "5.35 m labelled, 5.41 m drawn",
-      "note": "With the assumed walls, the gap between the vestibule and the reception opening is 5.41 m, so the drawn corridor runs 6 cm longer than its label. 5.35 m is the reported size."
+      "item": "Bedroom row position",
+      "value": "Bedroom 2 starts 1.42 m from the left",
+      "note": "Without wall thickness, the bedroom row (4.04 + 3.88 m) and the master, vestibule and corridor row (3.34 + 0.65 + 5.35 m) cannot both line up on the left and the right. Both rows end on the reception wall, so the corridor keeps its full 5.35 m, Bedroom 2 starts 1.42 m from the left, and the small terrace sits against it with 0.24 m of outside space beyond."
     },
     {
       "item": "Entrance lobby shape",
-      "value": "2.36 × 1.66 + 1.50 × 2.29",
-      "note": "Only the area is given. The shape follows the source drawing: a wider part under the reception and a narrower part beside the guest WC down to the entrance. Drawn area 7.35 m²."
+      "value": "2.75 × 1.46 + 1.50 × 2.19",
+      "note": "Only the area is given. The shape follows the source drawing: a wider part under the reception and a narrower part beside the guest WC down to the entrance. Drawn area 7.30 m², matching the plan."
     },
     {
-      "item": "Reception top wall",
-      "value": "0.10 m below the terrace railing line",
-      "note": "Placed so the reception's 6.34 m ends on the same line as the corridor and the lobby opening."
+      "item": "Reception top line",
+      "value": "0.20 m above the terrace railing",
+      "note": "The reception's 6.34 m depth ends on the corridor's bottom line, so its top wall sits 0.20 m above the top terrace's railing."
     },
     {
       "item": "Door widths",
@@ -300,8 +302,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "areaSource": "computed",
       "rect": [
         [
-          9.55,
-          0.1,
+          9.34,
+          0,
           4.04,
           6.34
         ]
@@ -325,8 +327,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "areaSource": "computed",
       "rect": [
         [
-          7.55,
-          6.59,
+          7.1,
+          6.34,
           3.53,
           2.34
         ]
@@ -348,7 +350,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "rect": [
         [
           0,
-          5.36,
+          5.26,
           3.34,
           4.97
         ]
@@ -371,8 +373,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "areaSource": "computed",
       "rect": [
         [
-          5.52,
-          1.67,
+          5.46,
+          1.72,
           3.88,
           3.54
         ]
@@ -395,8 +397,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "areaSource": "computed",
       "rect": [
         [
-          1.33,
-          1.67,
+          1.42,
+          1.72,
           4.04,
           3.54
         ]
@@ -417,8 +419,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "areaSource": "computed",
       "rect": [
         [
-          3.49,
-          6.59,
+          3.34,
+          6.34,
           1.88,
           2.34
         ]
@@ -442,8 +444,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "areaSource": "computed",
       "rect": [
         [
-          5.52,
-          6.59,
+          5.22,
+          6.34,
           1.88,
           2.34
         ]
@@ -464,8 +466,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "areaSource": "computed",
       "rect": [
         [
-          8.79,
-          9.08,
+          8.34,
+          8.68,
           2.29,
           1.31
         ]
@@ -487,22 +489,22 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "areaSource": "given",
       "rect": [
         [
-          11.23,
-          6.44,
-          2.36,
-          1.66
+          10.63,
+          6.34,
+          2.75,
+          1.46
         ],
         [
-          11.23,
-          8.1,
+          10.63,
+          7.8,
           1.5,
-          2.29
+          2.19
         ]
       ],
-      "acrossRef": "Area given only. Upper part: 2.36 m from the kitchen wall line to the outer wall, 1.66 m down from the reception opening. Lower part: 1.50 m from the guest WC wall to the lift shaft wall, 2.29 m down to the entrance wall.",
+      "acrossRef": "Area given only. Upper part: 2.75 m from the kitchen wall to the outer wall, 1.46 m down from the reception opening. Lower part: 1.50 m from the guest WC wall to the lift shaft wall, 2.19 m down to the entrance wall.",
       "deepRef": null,
       "arName": "بهو المدخل",
-      "acrossRefAr": "المساحة فقط هي المعطاة. الجزء العلوي: 2.36 م من خط حائط المطبخ إلى الحائط الخارجي، و1.66 م نزولًا من فتحة الاستقبال. الجزء السفلي: 1.50 م من حائط دورة مياه الضيوف إلى حائط بئر المصعد، و2.29 م نزولًا حتى حائط المدخل.",
+      "acrossRefAr": "المساحة فقط هي المعطاة. الجزء العلوي: 2.75 م من حائط المطبخ إلى الحائط الخارجي، و1.46 م نزولًا من فتحة الاستقبال. الجزء السفلي: 1.50 م من حائط دورة مياه الضيوف إلى حائط بئر المصعد، و2.19 م نزولًا حتى حائط المدخل.",
       "deepRefAr": null
     },
     {
@@ -516,9 +518,9 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "areaSource": "computed",
       "rect": [
         [
-          4.14,
-          5.36,
-          5.41,
+          3.99,
+          5.26,
+          5.35,
           1.08
         ]
       ],
@@ -539,8 +541,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "areaSource": "computed",
       "rect": [
         [
-          3.49,
-          5.36,
+          3.34,
+          5.26,
           0.65,
           1.08
         ]
@@ -565,8 +567,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "areaSource": "computed",
       "rect": [
         [
-          5.48,
-          0,
+          5.42,
+          0.2,
           3.92,
           1.52
         ]
@@ -591,8 +593,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "areaSource": "computed",
       "rect": [
         [
-          0,
-          3.93,
+          0.24,
+          3.98,
           1.18,
           1.28
         ]
@@ -611,7 +613,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     "terraces": 7.47,
     "total": 111.56
   },
-  "openingFormat": "geom = [wall direction h|v, wall face from, wall face to, opening from, opening to] in meters. Doors add [hinge at start, swing toward larger coordinate +1 or smaller -1].",
+  "openingFormat": "geom = [wall direction h|v, wall line, wall line (the same value: walls have no thickness), opening from, opening to] in meters. Doors add [hinge at start, swing toward larger coordinate +1 or smaller -1].",
   "doors": [
     {
       "between": [
@@ -623,10 +625,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "swingsInto": "bed2",
       "geom": [
         "h",
-        5.21,
+        5.26,
+        5.26,
+        4.56,
         5.36,
-        4.45,
-        5.25,
         false,
         -1
       ]
@@ -641,10 +643,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "swingsInto": "bed1",
       "geom": [
         "h",
-        5.21,
-        5.36,
-        5.62,
-        6.42,
+        5.26,
+        5.26,
+        5.56,
+        6.36,
         true,
         -1
       ]
@@ -659,10 +661,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "swingsInto": "bathA",
       "geom": [
         "h",
-        6.44,
-        6.59,
-        3.52,
-        4.12,
+        6.34,
+        6.34,
+        3.37,
+        3.97,
         true,
         1
       ]
@@ -677,10 +679,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "swingsInto": "bathB",
       "geom": [
         "h",
-        6.44,
-        6.59,
-        5.62,
-        6.32,
+        6.34,
+        6.34,
+        5.32,
+        6.02,
         true,
         1
       ]
@@ -695,10 +697,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "swingsInto": "kitchen",
       "geom": [
         "h",
-        6.44,
-        6.59,
-        7.65,
-        8.45,
+        6.34,
+        6.34,
+        7.2,
+        8.0,
         true,
         1
       ]
@@ -714,9 +716,9 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "geom": [
         "v",
         3.34,
-        3.49,
-        5.48,
-        6.28,
+        3.34,
+        5.38,
+        6.18,
         true,
         -1
       ]
@@ -731,10 +733,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "swingsInto": "wc",
       "geom": [
         "v",
-        11.08,
-        11.23,
-        9.4,
-        10.05,
+        10.63,
+        10.63,
+        9.25,
+        9.9,
         false,
         -1
       ]
@@ -749,10 +751,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "swingsInto": "lobby",
       "geom": [
         "h",
-        10.39,
-        10.54,
-        11.4,
-        12.4,
+        9.99,
+        9.99,
+        10.88,
+        11.88,
         true,
         -1
       ],
@@ -767,10 +769,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "width": 1.9,
       "geom": [
         "h",
-        1.52,
-        1.67,
-        6.5,
-        8.4
+        1.72,
+        1.72,
+        6.4,
+        8.3
       ]
     },
     {
@@ -782,10 +784,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "width": 1.12,
       "geom": [
         "v",
-        9.4,
-        9.55,
-        0.2,
-        1.32
+        9.34,
+        9.34,
+        0.4,
+        1.52
       ]
     },
     {
@@ -797,10 +799,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "width": 0.94,
       "geom": [
         "h",
-        5.21,
-        5.36,
-        0.12,
-        1.06
+        5.26,
+        5.26,
+        0.36,
+        1.3
       ]
     }
   ],
@@ -809,18 +811,18 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "room": "bed2",
       "geom": [
         "h",
-        1.52,
-        1.67,
-        2.2,
-        4.4
+        1.72,
+        1.72,
+        2.3,
+        4.5
       ]
     },
     {
       "room": "bed2",
       "geom": [
         "v",
-        1.18,
-        1.33,
+        1.42,
+        1.42,
         2.2,
         3.6
       ]
@@ -829,18 +831,18 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "room": "reception",
       "geom": [
         "h",
-        -0.05,
-        0.1,
-        10.3,
-        12.8
+        0,
+        0,
+        10.1,
+        12.6
       ]
     },
     {
       "room": "reception",
       "geom": [
         "v",
-        13.59,
-        13.74,
+        13.38,
+        13.38,
         1.2,
         4.8
       ]
@@ -849,7 +851,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "room": "master",
       "geom": [
         "v",
-        -0.15,
+        0,
         0,
         6.6,
         9.2
@@ -859,8 +861,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "room": "master",
       "geom": [
         "h",
-        10.33,
-        10.48,
+        10.23,
+        10.23,
         0.8,
         2.6
       ]
@@ -869,30 +871,30 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       "room": "bathA",
       "geom": [
         "h",
-        8.93,
-        9.08,
-        4.0,
-        4.9
+        8.68,
+        8.68,
+        3.85,
+        4.75
       ]
     },
     {
       "room": "bathB",
       "geom": [
         "h",
-        8.93,
-        9.08,
-        6.0,
-        6.9
+        8.68,
+        8.68,
+        5.7,
+        6.6
       ]
     },
     {
       "room": "kitchen",
       "geom": [
         "h",
-        8.93,
-        9.08,
-        7.7,
-        8.5
+        8.68,
+        8.68,
+        7.3,
+        8.1
       ]
     }
   ],
@@ -903,10 +905,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
         "corridor"
       ],
       "line": [
-        4.14,
-        5.36,
-        4.14,
-        6.44
+        3.99,
+        5.26,
+        3.99,
+        6.34
       ]
     },
     {
@@ -915,10 +917,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
         "reception"
       ],
       "line": [
-        9.55,
-        5.36,
-        9.55,
-        6.44
+        9.34,
+        5.26,
+        9.34,
+        6.34
       ]
     },
     {
@@ -927,10 +929,22 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
         "lobby"
       ],
       "line": [
-        11.23,
-        6.44,
-        13.59,
-        6.44
+        10.63,
+        6.34,
+        13.38,
+        6.34
+      ]
+    },
+    {
+      "between": [
+        "lobby",
+        "lobby"
+      ],
+      "line": [
+        10.63,
+        7.8,
+        12.13,
+        7.8
       ]
     }
   ],
@@ -938,19 +952,19 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     {
       "name": "Light well",
       "rect": [
-        3.49,
-        9.08,
-        5.15,
-        1.25
+        3.34,
+        8.68,
+        5.0,
+        1.55
       ]
     },
     {
       "name": "Lift / shaft",
       "rect": [
-        12.88,
-        8.25,
-        0.86,
-        2.14
+        12.13,
+        7.8,
+        1.25,
+        2.19
       ]
     }
   ],
@@ -960,36 +974,36 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   ],
   "i18n": {
     "ar": {
-      "conventionsText": "كل مقاس هو مقاس داخلي صافٍ: من الوجه الداخلي لحائط إلى الوجه الداخلي للحائط المقابل، دون احتساب سُمك الحوائط. عندما تنفتح غرفة على مساحة أخرى بدون حائط، ينتهي المقاس عند الخط الذي تتوقف عنده الحوائط المجاورة، وهو مرسوم بخط متقطع. المقاسات مكتوبة بالعرض × بالعمق: العرض من اليسار إلى اليمين كما في الرسم، والعمق من أعلى إلى أسفل. المساحة = العرض × العمق مقرّبة إلى 0.01 م²، وبهو المدخل يستخدم المساحة المعطاة 7.3 م².",
-      "coordinatesText": "x = 0 عند الوجه الداخلي للحائط الأيسر لغرفة النوم الرئيسية، وy = 0 عند الدرابزين الخارجي للتراس العلوي. تزيد x نحو يمين الرسم، وتزيد y نحو أسفله. أعلى الرسم ليس بالضرورة اتجاه الشمال، لأن المسقط الأصلي لا يوضح الشمال. المساطر وشبكة المتر وقراءة المؤشر وأداة القياس كلها تستخدم هذه الإحداثيات.",
+      "conventionsText": "كل مقاس هو مقاس داخلي صافٍ: من الوجه الداخلي لحائط إلى الوجه الداخلي للحائط المقابل، والحوائط مرسومة كخطوط على هذه الأوجه، لذلك لا يدخل سُمكها في أي مقاس. عندما تنفتح غرفة على مساحة أخرى بدون حائط، ينتهي المقاس عند الخط الذي تتوقف عنده الحوائط المجاورة، وهو مرسوم بخط متقطع. المقاسات مكتوبة بالعرض × بالعمق: العرض من اليسار إلى اليمين كما في الرسم، والعمق من أعلى إلى أسفل. المساحة = العرض × العمق مقرّبة إلى 0.01 م²، وبهو المدخل يستخدم المساحة المعطاة 7.3 م².",
+      "coordinatesText": "x = 0 عند خط الحائط الأيسر لغرفة النوم الرئيسية، وy = 0 عند خط الحائط العلوي للاستقبال. تزيد x نحو يمين الرسم، وتزيد y نحو أسفله. أعلى الرسم ليس بالضرورة اتجاه الشمال، لأن المسقط الأصلي لا يوضح الشمال. المساطر وشبكة المتر والأثاث وقراءة المؤشر وخطوط المسافات وأداة القياس كلها تستخدم هذه الإحداثيات وبنفس المقياس.",
       "method": [
         "نُقلت مقاسات كل غرفة من البيانات المكتوبة على مسقط المطوّر.",
         "طوبق كل رقمين مع الضلع الأطول والأقصر للغرفة بمقارنتهما بنسب الغرفة في الرسم الأصلي.",
         "رُوجعت كل مطابقة مع الغرف المجاورة التي تشترك في خط الحائط نفسه: غرفتا النوم بعمق 3.54 م، والحمامان والمطبخ بعمق 2.34 م، والتراس العلوي 3.92 م بمحاذاة غرفة النوم 1 بعرض 3.88 م.",
-        "وُضعت الغرف بنفس ترتيب المسقط الأصلي، مع فصلها بحوائط بسُمك مفترض.",
+        "وُضعت الغرف بنفس ترتيب المسقط الأصلي، والحوائط مرسومة كخطوط بدون سُمك، فكل غرفة بمقاسها الداخلي تمامًا والغرف المتجاورة تشترك في خط حائط واحد.",
         "نُقلت مواضع الأبواب والشبابيك من الرسم الأصلي وقُدّرت عروضها.",
         "حُسبت مساحة كل غرفة من بُعديها، وجُمعت المساحات للحصول على الإجماليات."
       ],
       "assumptions": [
         {
-          "item": "سُمك الحوائط",
-          "value": "0.15 م",
-          "note": "غير مذكور في المسقط. استُخدم لكل الحوائط الداخلية والخارجية، لذلك فالمقاس الخارجي الكلي (حوالي 13.9 × 10.5 م شاملًا التراسات) تقريبي. مقاسات الغرف لا تتأثر."
+          "item": "الحوائط",
+          "value": "مرسومة كخطوط بدون سُمك",
+          "note": "كل غرفة مرسومة بمقاسها الداخلي تمامًا، والغرف المتجاورة تشترك في خط حائط واحد، فيُظهر المسقط المساحة الداخلية القابلة للاستخدام فقط. الحدود الكلية (13.38 × 10.23 م) هي مجموع المقاسات الداخلية وليست المقاس الخارجي للمبنى."
         },
         {
-          "item": "طول الممر",
-          "value": "5.35 م مكتوب، 5.41 م مرسوم",
-          "note": "مع الحوائط المفترضة تصبح المسافة بين الردهة وفتحة الاستقبال 5.41 م، فيظهر الممر أطول بـ 6 سم من المكتوب. المقاس المعتمد هو 5.35 م."
+          "item": "موضع صف غرف النوم",
+          "value": "غرفة النوم 2 تبدأ على بُعد 1.42 م من اليسار",
+          "note": "بدون سُمك للحوائط لا يمكن أن يتطابق صف غرف النوم (4.04 + 3.88 م) مع صف غرفة النوم الرئيسية والردهة والممر (3.34 + 0.65 + 5.35 م) من اليسار واليمين معًا. ينتهي الصفان عند حائط الاستقبال، فيحتفظ الممر بطوله الكامل 5.35 م، وتبدأ غرفة النوم 2 على بُعد 1.42 م من اليسار، ويقع التراس الصغير ملاصقًا لها مع 0.24 م خارج الشقة."
         },
         {
           "item": "شكل بهو المدخل",
-          "value": "2.36 × 1.66 + 1.50 × 2.29",
-          "note": "المعطى هو المساحة فقط. الشكل مأخوذ من الرسم الأصلي: جزء أعرض أسفل الاستقبال، وجزء أضيق بجوار دورة مياه الضيوف حتى المدخل. المساحة المرسومة 7.35 م²."
+          "value": "2.75 × 1.46 + 1.50 × 2.19",
+          "note": "المعطى هو المساحة فقط. الشكل مأخوذ من الرسم الأصلي: جزء أعرض أسفل الاستقبال، وجزء أضيق بجوار دورة مياه الضيوف حتى المدخل. المساحة المرسومة 7.30 م² مطابقة للمسقط."
         },
         {
-          "item": "الحائط العلوي للاستقبال",
-          "value": "0.10 م أسفل خط درابزين التراس",
-          "note": "وُضع بحيث ينتهي عمق الاستقبال 6.34 م على نفس خط الممر وفتحة البهو."
+          "item": "الخط العلوي للاستقبال",
+          "value": "0.20 م أعلى درابزين التراس",
+          "note": "ينتهي عمق الاستقبال 6.34 م على الخط السفلي للممر، لذلك يقع حائطه العلوي أعلى درابزين التراس العلوي بـ 0.20 م."
         },
         {
           "item": "عروض الأبواب",
@@ -1003,7 +1017,38 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
         }
       ]
     }
-  }
+  },
+  "railings": [
+    [
+      [
+        5.42,
+        1.72
+      ],
+      [
+        5.42,
+        0.2
+      ],
+      [
+        9.34,
+        0.2
+      ]
+    ],
+    [
+      [
+        0.24,
+        5.26
+      ],
+      [
+        0.24,
+        3.98
+      ],
+      [
+        1.42,
+        3.98
+      ]
+    ]
+  ],
+  "wallModel": "Walls are zero-thickness lines on the rooms' inside faces. Every room rectangle is exactly its clear inside size, and neighbouring rooms share one wall line."
 }
 </script>
 
@@ -1238,7 +1283,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   el("circle", { cx: 8, cy: 8, r: 1.5, class: "pat-dot" }, dots);
 
   const layer = id => el("g", { id }, svg);
-  const gOut = layer("outside"), gWall = layer("walls"), gFloor = layer("floors"), gOpen = layer("openings"),
+  const gOut = layer("outside"), gFloor = layer("floors"), gWall = layer("walls"), gOpen = layer("openings"),
         gEdge = layer("edges"), gGrid = layer("grid"), gLab = layer("labels"), gFurn = layer("furniture"),
         gSel = layer("selection"), gGap = layer("gaps"), gGhost = layer("ghost"), gRul = layer("rulers"), gMeas = layer("measure");
   gGap.setAttribute("pointer-events", "none");
@@ -1256,33 +1301,32 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   el("line", { x1: m(lift[0]), y1: m(lift[1]), x2: m(lift[0] + lift[2]), y2: m(lift[1] + lift[3]), class: "x-line" }, gOut);
   el("line", { x1: m(lift[0] + lift[2]), y1: m(lift[1]), x2: m(lift[0]), y2: m(lift[1] + lift[3]), class: "x-line" }, gOut);
 
-  // Walls: each indoor room grown by the wall thickness; floors painted on top
-  ROOMS.filter(r => !r.outdoor).forEach(r => r.rect.forEach(([x, y, w, h]) =>
-    el("rect", { x: m(x - T), y: m(y - T), width: m(w + 2 * T), height: m(h + 2 * T), class: "wall" }, gWall)));
+  // Floors: every room is exactly its clear inside size
   ROOMS.forEach(r => r.rect.forEach(([x, y, w, h]) =>
     el("rect", { x: m(x), y: m(y), width: m(w), height: m(h), class: "floor" + (r.outdoor ? " terr" : ""), "data-room": r.id }, gFloor)));
+  // Walls: zero-thickness lines on the room edges; neighbouring rooms share one line
+  ROOMS.filter(r => !r.outdoor).forEach(r => r.rect.forEach(([x, y, w, h]) =>
+    el("rect", { x: m(x), y: m(y), width: m(w), height: m(h), class: "wall" }, gWall)));
 
   // Terrace railings
   const poly = pts => el("polyline", { points: pts.map(p => p.map(m).join(",")).join(" "), class: "rail" }, gOpen);
-  poly([[5.48, 1.52], [5.48, 0], [9.40, 0]]);
-  poly([[1.18, 3.93], [0, 3.93], [0, 5.21]]);
+  D.railings.forEach(poly);
 
-  const gapRect = (o, w1, w2, a1, a2, cls = "gap") => o === "h"
-    ? el("rect", { x: m(a1), y: m(w1), width: m(a2 - a1), height: m(w2 - w1), class: cls }, gOpen)
-    : el("rect", { x: m(w1), y: m(a1), width: m(w2 - w1), height: m(a2 - a1), class: cls }, gOpen);
   const P = (o, along, across) => o === "h" ? [along, across] : [across, along];
   const line = (p1, p2, cls) => el("line", { x1: m(p1[0]), y1: m(p1[1]), x2: m(p2[0]), y2: m(p2[1]), class: cls }, gOpen);
+  // An opening removes the wall line between a1 and a2
+  const erase = (o, c, a1, a2) => line(P(o, a1, c), P(o, a2, c), "erase");
 
   D.doors.forEach(d => {
-    const [o, w1, w2, a1, a2, hs, side] = d.geom;
-    gapRect(o, w1, w2, a1, a2);
+    const [o, c, , a1, a2, hs, side] = d.geom;
+    erase(o, c, a1, a2);
     if (d.type === "sliding") {
-      const th = w2 - w1, L = a2 - a1;
-      line(P(o, a1, w1 + th * 0.32), P(o, a1 + L * 0.58, w1 + th * 0.32), "slide");
-      line(P(o, a2 - L * 0.58, w1 + th * 0.68), P(o, a2, w1 + th * 0.68), "slide");
+      const L = a2 - a1;
+      line(P(o, a1, c - 0.03), P(o, a1 + L * 0.58, c - 0.03), "slide");
+      line(P(o, a2 - L * 0.58, c + 0.03), P(o, a2, c + 0.03), "slide");
       return;
     }
-    const L = a2 - a1, ha = hs ? a1 : a2, oa = hs ? a2 : a1, face = side > 0 ? w2 : w1;
+    const L = a2 - a1, ha = hs ? a1 : a2, oa = hs ? a2 : a1, face = c;
     const H = P(o, ha, face), tip = P(o, ha, face + side * L), J = P(o, oa, face);
     const v1 = [tip[0] - H[0], tip[1] - H[1]], v2 = [J[0] - H[0], J[1] - H[1]];
     const sweep = v1[0] * v2[1] - v1[1] * v2[0] > 0 ? 1 : 0;
@@ -1290,13 +1334,19 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     el("path", { d: `M${m(tip[0])},${m(tip[1])} A${m(L)},${m(L)} 0 0 ${sweep} ${m(J[0])},${m(J[1])}`, class: "swing" }, gOpen);
   });
   D.windows.forEach(w => {
-    const [o, w1, w2, a1, a2] = w.geom;
-    gapRect(o, w1, w2, a1, a2, "glass");
-    const mid = (w1 + w2) / 2;
-    line(P(o, a1, mid), P(o, a2, mid), "glass-line");
+    const [o, c, , a1, a2] = w.geom;
+    erase(o, c, a1, a2);
+    line(P(o, a1, c - 0.04), P(o, a2, c - 0.04), "glass-line");
+    line(P(o, a1, c + 0.04), P(o, a2, c + 0.04), "glass-line");
+    line(P(o, a1, c), P(o, a2, c), "glass-mid");
+    line(P(o, a1, c - 0.04), P(o, a1, c + 0.04), "glass-line");
+    line(P(o, a2, c - 0.04), P(o, a2, c + 0.04), "glass-line");
   });
+  // Open edges: no wall between two spaces, only a dashed boundary
   D.openEdges.forEach(e => {
-    const [x1, y1, x2, y2] = e.line;
+    const [x1, y1, x2, y2] = e.line, o = y1 === y2 ? "h" : "v";
+    const c = o === "h" ? y1 : x1, a1 = o === "h" ? x1 : y1, a2 = o === "h" ? x2 : y2;
+    erase(o, c, a1 + 0.03, a2 - 0.03);
     el("line", { x1: m(x1), y1: m(y1), x2: m(x2), y2: m(y2), class: "open-edge" }, gEdge);
   });
 
@@ -1349,10 +1399,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       });
     });
     const note = (x, y, text) => { const tx = el("text", { x: m(x), y: m(y), class: "t-note", "text-anchor": "middle", direction: ar ? "rtl" : "ltr" }, gLab); tx.textContent = text; };
-    note(6.07, 9.76, t("lightwell"));
-    note(13.31, 9.38, t("lift1")); note(13.31, 9.56, t("lift2"));
-    el("path", { d: `M${m(11.9)},${m(10.62)} l${m(0.13)},${m(0.2)} l${m(-0.26)},0 z`, class: "arrow" }, gLab);
-    const ent = el("text", { x: m(11.9), y: m(11.08), class: "t-tag", "text-anchor": "middle", direction: ar ? "rtl" : "ltr" }, gLab);
+    note(5.84, 9.52, t("lightwell"));
+    note(12.755, 8.82, t("lift1")); note(12.755, 9.0, t("lift2"));
+    el("path", { d: `M${m(11.38)},${m(10.1)} l${m(0.13)},${m(0.2)} l${m(-0.26)},0 z`, class: "arrow" }, gLab);
+    const ent = el("text", { x: m(11.38), y: m(10.56), class: "t-tag", "text-anchor": "middle", direction: ar ? "rtl" : "ltr" }, gLab);
     ent.textContent = t("entrance");
     rulerUnit.textContent = t("m");
     scaleEnd.textContent = `4 ${t("m")}`;
@@ -1599,23 +1649,38 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     renderSel();
   }
   // ---- Clearance: distance from each side of a piece to the nearest wall or piece ----
-  // Free floor = every room's clear inside rectangle (walls and door gaps are not floor),
-  // so a ray stops at a wall face and passes through open edges between spaces.
-  const FREE = ROOMS.flatMap(r => r.rect);
-  const inFree = (x, y) => FREE.some(([rx, ry, rw, rh]) => x >= rx - 1e-6 && x <= rx + rw + 1e-6 && y >= ry - 1e-6 && y <= ry + rh + 1e-6);
-  function wallDist(x, y, dx, dy) {
-    let tt = 0;
-    for (let guard = 0; guard < 24; guard++) {
-      const px = x + dx * (tt + 1e-4), py = y + dy * (tt + 1e-4);
-      const r = FREE.find(([rx, ry, rw, rh]) => px >= rx && px <= rx + rw && py >= ry && py <= ry + rh);
-      if (!r) return tt;
-      const [rx, ry, rw, rh] = r;
-      const exit = dx > 0 ? rx + rw - x : dx < 0 ? x - rx : dy > 0 ? ry + rh - y : y - ry;
-      if (exit <= tt + 1e-6) return tt;
-      tt = exit;
-    }
-    return tt;
+  // Walls are the zero-thickness edges of every room and terrace, minus the open
+  // edges between spaces. Door openings still count as wall, so a gap is measured
+  // to the wall line, never through a doorway.
+  const near = (a, b) => Math.abs(a - b) < 1e-6;
+  const OPEN = D.openEdges.map(e => e.line);
+  function minusOpen([x1, y1, x2, y2]) {
+    const horiz = near(y1, y2), c = horiz ? y1 : x1;
+    let parts = [[Math.min(horiz ? x1 : y1, horiz ? x2 : y2), Math.max(horiz ? x1 : y1, horiz ? x2 : y2)]];
+    OPEN.forEach(([ox1, oy1, ox2, oy2]) => {
+      const oh = near(oy1, oy2);
+      if (oh !== horiz || !near(oh ? oy1 : ox1, c)) return;
+      const lo = Math.min(oh ? ox1 : oy1, oh ? ox2 : oy2), hi = Math.max(oh ? ox1 : oy1, oh ? ox2 : oy2);
+      parts = parts.flatMap(([a, b]) => (hi <= a || lo >= b) ? [[a, b]] : [[a, lo], [hi, b]].filter(([p, q]) => q - p > 1e-6));
+    });
+    return parts.map(([a, b]) => horiz ? [a, c, b, c] : [c, a, c, b]);
   }
+  const WALLS = ROOMS.flatMap(r => r.rect.flatMap(([x, y, w, h]) =>
+    [[x, y, x + w, y], [x, y + h, x + w, y + h], [x, y, x, y + h], [x + w, y, x + w, y + h]].flatMap(minusOpen)));
+  function wallDist(x, y, dx, dy) {
+    let best = Infinity;
+    for (const [x1, y1, x2, y2] of WALLS) {
+      let d;
+      if (dx) { if (!near(x1, x2) || y < Math.min(y1, y2) - 1e-9 || y > Math.max(y1, y2) + 1e-9) continue; d = (x1 - x) * dx; }
+      else { if (!near(y1, y2) || x < Math.min(x1, x2) - 1e-9 || x > Math.max(x1, x2) + 1e-9) continue; d = (y1 - y) * dy; }
+      if (d >= -1e-6 && d < best) best = Math.max(0, d);
+    }
+    return best;
+  }
+  // A wall line passing through the inside of the piece's box means it overlaps a wall
+  const crossesWall = ([x0, y0, x1, y1]) => WALLS.some(([a, b, c, d]) => near(a, c)
+    ? a > x0 + 1e-3 && a < x1 - 1e-3 && Math.max(b, d) > y0 + 1e-3 && Math.min(b, d) < y1 - 1e-3
+    : b > y0 + 1e-3 && b < y1 - 1e-3 && Math.max(a, c) > x0 + 1e-3 && Math.min(a, c) < x1 - 1e-3);
   function aabb(it) {
     const a = it.rot * Math.PI / 180, c = Math.abs(Math.cos(a)), s = Math.abs(Math.sin(a));
     const hx = (c * it.L + s * it.W) / 2, hy = (s * it.L + c * it.W) / 2;
@@ -1637,6 +1702,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     const boxes = items.filter(o => o !== it).map(aabb);
     const out = { sides: {}, wall: false, item: false };
     out.item = boxes.some(b => b[0] < x1 - 1e-3 && b[2] > x0 + 1e-3 && b[1] < y1 - 1e-3 && b[3] > y0 + 1e-3);
+    out.wall = crossesWall([x0, y0, x1, y1]);
     for (const [k, dx, dy] of DIRS) {
       const a = dx ? y0 : x0, b = dx ? y1 : x1;
       const n = Math.max(2, Math.ceil((b - a) / 0.05));
@@ -1644,7 +1710,6 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       for (let i = 0; i <= n; i++) {
         const sAlong = a + 0.003 + (b - a - 0.006) * i / n;
         const px = dx ? (dx > 0 ? x1 : x0) : sAlong, py = dx ? sAlong : (dy > 0 ? y1 : y0);
-        if (!inFree(px - dx * 0.003, py - dy * 0.003)) out.wall = true;
         const w = wallDist(px, py, dx, dy), f = itemDist(px, py, dx, dy, boxes);
         const d = Math.min(w, f), off = Math.abs(sAlong - (a + b) / 2);
         // Smallest gap wins; on a tie, draw it nearest the middle of the side

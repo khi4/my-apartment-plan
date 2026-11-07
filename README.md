@@ -23,7 +23,7 @@ Then delete the `src/check-*.js` files it leaves behind (they are only for synta
 
 - Every room size is a clear inside dimension: from the inside face of one wall to the inside face of the opposite wall, in meters, copied from the developer's plan.
 - Sizes are written across × deep (left to right, then top to bottom, as drawn).
-- Walls are assumed 15 cm thick, so the overall outer size is approximate; room sizes are not affected.
+- Walls are drawn as lines with no thickness: every room is exactly its clear inside size, neighbouring rooms share one wall line, and the grid, rulers, furniture and measurements all use one scale (1 square = 1 m).
 - Door and window positions are traced from the source drawing.
 - Indoor area 104.09 m², terraces 7.47 m², total 111.56 m².
 
