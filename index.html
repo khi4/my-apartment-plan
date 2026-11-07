@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3-Bedroom Apartment Plan</title>
+<meta name="description" content="Scaled 2D floor plan of a 3-bedroom apartment with a furniture planner. White and black versions.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600&family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+  :root { --paper: #ffffff; --ink: #111111; --mid: #666666; --line: #cfcfcf; color-scheme: light; }
+  @media (prefers-color-scheme: dark) { :root { --paper: #0b0b0b; --ink: #ececec; --mid: #9b9b9b; --line: #2f2f2f; color-scheme: dark; } }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.55 "IBM Plex Sans", system-ui, sans-serif; }
+  main { max-width: 640px; margin: 0 auto; padding: 64px 16px; }
+  .eyebrow { font: 11px "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .09em; text-transform: uppercase; color: var(--mid); }
+  h1 { font: 600 clamp(32px, 6vw, 46px)/1 "Barlow Condensed", "Arial Narrow", sans-serif; margin: 8px 0 12px; }
+  p { color: var(--mid); margin: 0 0 28px; }
+  .links { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 460px) { .links { grid-template-columns: 1fr; } }
+  a { display: block; border: 1px solid var(--line); padding: 18px; color: var(--ink); text-decoration: none; }
+  a:hover, a:focus-visible { border-color: var(--ink); outline: none; }
+  a strong { display: block; font: 600 22px "Barlow Condensed", "Arial Narrow", sans-serif; }
+  a span { font-size: 13px; color: var(--mid); }
+  .swatch { display: block; height: 36px; margin-bottom: 12px; border: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Floor plan · drawn to scale · meters</div>
+  <h1>3-Bedroom Apartment Plan</h1>
+  <p>104.09 m² indoor, 7.47 m² terraces. Drag resizable furniture onto the rooms. Your layout saves in this browser.</p>
+  <div class="links">
+    <a href="apartment-plan.html"><i class="swatch" style="background:#fff"></i><strong>White</strong><span>Black lines on white</span></a>
+    <a href="apartment-plan-black.html"><i class="swatch" style="background:#0b0b0b"></i><strong>Black</strong><span>White lines on black</span></a>
+  </div>
+</main>
+</body>
+</html>
