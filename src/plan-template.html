@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <title>__TITLE__</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Scaled 2D floor plan of a 3-bedroom apartment (__VARIANT__ version). Room sizes are clear inside dimensions in meters, measured from the inside face of one wall to the inside face of the opposite wall, copied from the developer's plan. The full method, assumptions and coordinates are in the JSON block with id plan-data. Furniture (bed, L-sofa, sofa, chair, wardrobe, table) can be sized in meters and dragged onto the plan; the layout is saved in the page's database at layouts/main.">
+<meta name="description" content="Scaled 2D floor plan of a 3-bedroom apartment (__VARIANT__ version). Room sizes are clear inside dimensions in meters, measured from the inside face of one wall to the inside face of the opposite wall, copied from the developer's plan. The full method, assumptions and coordinates are in the JSON block with id plan-data. Furniture (bed, L-sofa, sofa, chair, wardrobe, table) can be sized in meters and dragged onto the plan; the layout is saved in the page's database at layouts/main. Available in English and Arabic, with white and black themes.">
 <meta name="plan:furniture-units" content="Furniture length (L) and width (W) in meters; position x, y is the piece's center in plan coordinates; rot in degrees clockwise.">
 
 <meta name="plan:units" content="meters">
@@ -14,17 +14,40 @@
 <meta name="plan:area-net-total" content="111.56 m²">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
 <style>
-/* Layout: one drafting card (figure label, title, drawing, hint, live readout), then the room table and the method. Single committed __VARIANT__ look. */
+/* Layout: one drafting card (figure label, title, drawing, hint, live readout), then the room table and the method. White and black looks, switchable; English and Arabic (RTL). */
 :root {
-  __TOKENS__
-  --f-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
-  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --paper: #ffffff; --floor: #ffffff; --raise: #efefef; --ink: #111111; --mid: #666666; --lo: #a3a3a3; --faint: #e5e5e5; --line: #cfcfcf; --grid: rgba(0, 0, 0, 0.075); --lit: #000000; color-scheme: light;
+  --f-display: "Barlow Condensed", "IBM Plex Sans Arabic", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --f-body: "IBM Plex Sans", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", "IBM Plex Sans Arabic", ui-monospace, "SF Mono", Menlo, monospace;
   --f-ar: "IBM Plex Sans Arabic", "Geeza Pro", "Segoe UI", Tahoma, sans-serif;
 }
 [hidden] { display: none !important; }
+:root[data-look="black"] { --paper: #0b0b0b; --floor: #0b0b0b; --raise: #1d1d1d; --ink: #ececec; --mid: #9b9b9b; --lo: #5e5e5e; --faint: #232323; --line: #2f2f2f; --grid: rgba(255, 255, 255, 0.08); --lit: #ffffff; color-scheme: dark; }
+html { background: var(--paper); }
+
+/* Header switchers */
+.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 16px 24px; }
+.head-text { min-width: 0; }
+.switches { display: flex; flex-wrap: wrap; gap: 10px; }
+.seg { display: inline-flex; border: 1px solid var(--line); }
+.seg button { display: inline-flex; align-items: center; gap: 7px; font: 500 13px var(--f-body); color: var(--mid); background: none; border: 0; padding: 7px 12px; cursor: pointer; }
+.seg button + button { border-inline-start: 1px solid var(--line); }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.seg button:focus-visible { outline: 1.5px solid var(--ink); outline-offset: 2px; }
+.seg button[lang="ar"] { font-family: "IBM Plex Sans Arabic", "Geeza Pro", Tahoma, sans-serif; }
+.dot { width: 10px; height: 10px; border: 1px solid currentColor; flex: none; }
+.dot-w { background: #ffffff; } .dot-b { background: #000000; }
+
+/* Arabic: no letter-spacing or uppercase on Arabic text */
+html[lang="ar"] .eyebrow, html[lang="ar"] .cap, html[lang="ar"] h3, html[lang="ar"] thead th, html[lang="ar"] .t-tag, html[lang="ar"] h1, html[lang="ar"] h2 { letter-spacing: 0; text-transform: none; }
+html[lang="ar"] h1 { font-size: clamp(28px, 4.2vw, 40px); line-height: 1.25; }
+html[lang="ar"] .eyebrow, html[lang="ar"] .cap, html[lang="ar"] h3, html[lang="ar"] thead th { font-family: var(--f-ar); font-size: 12px; }
+html[lang="ar"] .sum-meta::after { content: " · عرض"; }
+html[lang="ar"] details.rooms[open] .sum-meta::after { content: " · إخفاء"; }
 body { background: var(--paper); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
 .wrap {
   max-width: 1120px; margin: 0 auto; display: grid; gap: 36px;
@@ -52,10 +75,10 @@ h3 { font-family: var(--f-mono); font-weight: 500; font-size: 11px; letter-spaci
 .ctl button:hover { color: var(--ink); }
 .ctl button[aria-pressed="true"] { color: var(--ink); text-decoration-color: var(--ink); }
 .ctl button:focus-visible, .copy:focus-visible, tr.row:focus-visible, summary:focus-visible { outline: 1.5px solid var(--ink); outline-offset: 3px; }
-kbd { font-family: var(--f-mono); font-size: 10.5px; border: 1px solid var(--line); padding: 0 4px; margin-left: 4px; color: var(--mid); }
-.readout { font-family: var(--f-mono); font-size: 12px; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.plan-scroll { overflow-x: auto; }
-#plan { display: block; width: 100%; min-width: 640px; height: auto; touch-action: manipulation; }
+kbd { font-family: var(--f-mono); font-size: 10.5px; border: 1px solid var(--line); padding: 0 4px; margin-inline-start: 4px; color: var(--mid); }
+.readout { unicode-bidi: plaintext; font-family: var(--f-mono); font-size: 12px; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.plan-scroll { overflow-x: auto; direction: ltr; }
+#plan { direction: ltr; display: block; width: 100%; min-width: 640px; height: auto; touch-action: manipulation; }
 #plan.measuring { cursor: crosshair; }
 
 /* Drawing (1 SVG unit = 1 cm) */
@@ -133,7 +156,7 @@ kbd { font-family: var(--f-mono); font-size: 10.5px; border: 1px solid var(--lin
 .ghost { opacity: 0.65; pointer-events: none; }
 .sel-box { fill: none; stroke: var(--lit); stroke-width: 2; stroke-dasharray: 7 5; pointer-events: none; }
 .sel-handle { fill: var(--paper); stroke: var(--lit); stroke-width: 2.5; cursor: nwse-resize; touch-action: none; }
-.sel-text { font-family: var(--f-mono); font-size: 20px; font-weight: 500; fill: var(--lit); paint-order: stroke; stroke: var(--paper); stroke-width: 7px; stroke-linejoin: round; pointer-events: none; }
+.sel-text { direction: ltr; font-family: var(--f-mono); font-size: 20px; font-weight: 500; fill: var(--lit); paint-order: stroke; stroke: var(--paper); stroke-width: 7px; stroke-linejoin: round; pointer-events: none; }
 
 /* Rooms (collapsible) */
 details.rooms { margin: 0; border-top: 1px solid var(--ink); }
@@ -149,9 +172,9 @@ details.rooms .method { border-top: 1px solid var(--line); padding-top: 18px; pa
 /* Room table */
 .table-scroll { overflow-x: auto; border-top: 1px solid var(--line); }
 table { width: 100%; min-width: 760px; border-collapse: collapse; font-size: 13.5px; }
-th, td { text-align: left; padding: 10px 12px; vertical-align: top; }
-th:first-child, td:first-child { padding-left: 0; }
-th:last-child, td:last-child { padding-right: 0; text-align: right; }
+th, td { text-align: start; padding: 10px 12px; vertical-align: top; }
+th:first-child, td:first-child { padding-inline-start: 0; }
+th:last-child, td:last-child { padding-inline-end: 0; text-align: end; }
 thead th { font-family: var(--f-mono); font-weight: 400; font-size: 10.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--mid); border-bottom: 1px solid var(--line); }
 tr.row { border-bottom: 1px solid var(--faint); }
 tr.row.hot { background: var(--raise); }
@@ -167,7 +190,7 @@ tfoot tr:last-child td { font-weight: 500; border-top: 1px solid var(--line); }
 .method { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; border-top: 1px solid var(--ink); padding-top: 22px; }
 @media (max-width: 820px) { .method { grid-template-columns: minmax(0, 1fr); } }
 .method p, .method li, .method dd { font-size: 14px; max-width: 62ch; }
-.method ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+.method ol { margin: 0; padding-inline-start: 20px; display: grid; gap: 8px; }
 .method dl { margin: 0; display: grid; gap: 12px; }
 .method dt { font-weight: 500; font-size: 14px; }
 .method dt .num { color: var(--mid); font-weight: 400; display: block; white-space: normal; font-size: 12.5px; }
@@ -179,6 +202,7 @@ details { margin-top: 12px; }
 summary { cursor: pointer; font-size: 13px; color: var(--mid); }
 pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-height: 420px; overflow: auto; border: 1px solid var(--faint); padding: 12px; margin: 10px 0 0; color: var(--ink); background: var(--paper); }
 </style>
+<script>(function(){var d=document.documentElement,v=null,l=null;try{v=localStorage.getItem("apartment-plan-look-__VARIANT__");l=localStorage.getItem("apartment-plan-lang")}catch(e){}d.setAttribute("data-look",v==="white"||v==="black"?v:"__DEFAULT_LOOK__");var h=location.hash;if(h==="#ar"||h==="#en")l=h.slice(1);if(l==="ar"){d.lang="ar";d.dir="rtl"}else{d.lang="en";d.dir="ltr"}})();</script>
 
 <script type="application/json" id="plan-data">
 {
@@ -222,142 +246,818 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     "Computed each area from its two dimensions and added them up for the totals."
   ],
   "assumptions": [
-    { "item": "Wall thickness", "value": "0.15 m", "note": "Not given on the plan. Used for every wall, inside and outside, so the overall outer size (about 13.9 × 10.5 m including terraces) is approximate. Room sizes are not affected." },
-    { "item": "Corridor length", "value": "5.35 m labelled, 5.41 m drawn", "note": "With the assumed walls, the gap between the vestibule and the reception opening is 5.41 m, so the drawn corridor runs 6 cm longer than its label. 5.35 m is the reported size." },
-    { "item": "Entrance lobby shape", "value": "2.36 × 1.66 + 1.50 × 2.29", "note": "Only the area is given. The shape follows the source drawing: a wider part under the reception and a narrower part beside the guest WC down to the entrance. Drawn area 7.35 m²." },
-    { "item": "Reception top wall", "value": "0.10 m below the terrace railing line", "note": "Placed so the reception's 6.34 m ends on the same line as the corridor and the lobby opening." },
-    { "item": "Door widths", "value": "0.80 m bedrooms and kitchen, 0.60–0.70 m bathrooms, 0.65 m guest WC, 1.00 m entrance", "note": "Estimated from the drawing." },
-    { "item": "Windows and sliding doors", "value": "Traced", "note": "Positions and widths follow the source drawing. They are not measured." }
+    {
+      "item": "Wall thickness",
+      "value": "0.15 m",
+      "note": "Not given on the plan. Used for every wall, inside and outside, so the overall outer size (about 13.9 × 10.5 m including terraces) is approximate. Room sizes are not affected."
+    },
+    {
+      "item": "Corridor length",
+      "value": "5.35 m labelled, 5.41 m drawn",
+      "note": "With the assumed walls, the gap between the vestibule and the reception opening is 5.41 m, so the drawn corridor runs 6 cm longer than its label. 5.35 m is the reported size."
+    },
+    {
+      "item": "Entrance lobby shape",
+      "value": "2.36 × 1.66 + 1.50 × 2.29",
+      "note": "Only the area is given. The shape follows the source drawing: a wider part under the reception and a narrower part beside the guest WC down to the entrance. Drawn area 7.35 m²."
+    },
+    {
+      "item": "Reception top wall",
+      "value": "0.10 m below the terrace railing line",
+      "note": "Placed so the reception's 6.34 m ends on the same line as the corridor and the lobby opening."
+    },
+    {
+      "item": "Door widths",
+      "value": "0.80 m bedrooms and kitchen, 0.60–0.70 m bathrooms, 0.65 m guest WC, 1.00 m entrance",
+      "note": "Estimated from the drawing."
+    },
+    {
+      "item": "Windows and sliding doors",
+      "value": "Traced",
+      "note": "Positions and widths follow the source drawing. They are not measured."
+    }
   ],
   "rooms": [
-    { "id": "reception", "group": "Living", "en": "Reception & Dining", "ar": "استقبال و طعام", "across": 4.04, "deep": 6.34, "area": 25.61, "areaSource": "computed", "rect": [[9.55, 0.10, 4.04, 6.34]],
+    {
+      "id": "reception",
+      "group": "Living",
+      "en": "Reception & Dining",
+      "ar": "استقبال و طعام",
+      "across": 4.04,
+      "deep": 6.34,
+      "area": 25.61,
+      "areaSource": "computed",
+      "rect": [
+        [
+          9.55,
+          0.1,
+          4.04,
+          6.34
+        ]
+      ],
       "acrossRef": "Wall shared with Bedroom 1 and the top terrace (left) to the outer wall (right)",
-      "deepRef": "Outer wall (top) to the open edge with the corridor and entrance lobby (bottom)", "note": "Door to the top terrace" },
-    { "id": "kitchen", "group": "Living", "en": "Kitchen", "ar": "مطبخ", "across": 3.53, "deep": 2.34, "area": 8.26, "areaSource": "computed", "rect": [[7.55, 6.59, 3.53, 2.34]],
+      "deepRef": "Outer wall (top) to the open edge with the corridor and entrance lobby (bottom)",
+      "note": "Door to the top terrace",
+      "arName": "الاستقبال والسفرة",
+      "acrossRefAr": "من الحائط المشترك مع غرفة النوم 1 والتراس العلوي (يسار) إلى الحائط الخارجي (يمين)",
+      "deepRefAr": "من الحائط الخارجي (أعلى) إلى الحد المفتوح على الممر وبهو المدخل (أسفل)",
+      "noteAr": "باب إلى التراس العلوي"
+    },
+    {
+      "id": "kitchen",
+      "group": "Living",
+      "en": "Kitchen",
+      "ar": "مطبخ",
+      "across": 3.53,
+      "deep": 2.34,
+      "area": 8.26,
+      "areaSource": "computed",
+      "rect": [
+        [
+          7.55,
+          6.59,
+          3.53,
+          2.34
+        ]
+      ],
       "acrossRef": "Wall shared with the bathroom (left) to the wall with the entrance lobby (right)",
-      "deepRef": "Corridor wall (top) to the wall with the light well and guest WC (bottom)" },
-    { "id": "master", "group": "Bedrooms", "en": "Master Bedroom", "ar": "غرفة نوم رئيسية", "across": 3.34, "deep": 4.97, "area": 16.60, "areaSource": "computed", "rect": [[0, 5.36, 3.34, 4.97]],
+      "deepRef": "Corridor wall (top) to the wall with the light well and guest WC (bottom)",
+      "acrossRefAr": "من الحائط المشترك مع الحمام (يسار) إلى حائط بهو المدخل (يمين)",
+      "deepRefAr": "من حائط الممر (أعلى) إلى حائط المنور ودورة مياه الضيوف (أسفل)"
+    },
+    {
+      "id": "master",
+      "group": "Bedrooms",
+      "en": "Master Bedroom",
+      "ar": "غرفة نوم رئيسية",
+      "across": 3.34,
+      "deep": 4.97,
+      "area": 16.6,
+      "areaSource": "computed",
+      "rect": [
+        [
+          0,
+          5.36,
+          3.34,
+          4.97
+        ]
+      ],
       "acrossRef": "Outer wall (left) to the wall with the suite vestibule and en-suite (right)",
-      "deepRef": "Wall with the small terrace and Bedroom 2 (top) to the outer wall (bottom)", "note": "Suite with en-suite bath and the small terrace" },
-    { "id": "bed1", "group": "Bedrooms", "en": "Bedroom 1", "ar": "غرفة نوم 1", "across": 3.88, "deep": 3.54, "area": 13.74, "areaSource": "computed", "rect": [[5.52, 1.67, 3.88, 3.54]],
+      "deepRef": "Wall with the small terrace and Bedroom 2 (top) to the outer wall (bottom)",
+      "note": "Suite with en-suite bath and the small terrace",
+      "acrossRefAr": "من الحائط الخارجي (يسار) إلى حائط ردهة الجناح والحمام الملحق (يمين)",
+      "deepRefAr": "من حائط التراس الصغير وغرفة النوم 2 (أعلى) إلى الحائط الخارجي (أسفل)",
+      "noteAr": "جناح بحمام ملحق والتراس الصغير"
+    },
+    {
+      "id": "bed1",
+      "group": "Bedrooms",
+      "en": "Bedroom 1",
+      "ar": "غرفة نوم 1",
+      "across": 3.88,
+      "deep": 3.54,
+      "area": 13.74,
+      "areaSource": "computed",
+      "rect": [
+        [
+          5.52,
+          1.67,
+          3.88,
+          3.54
+        ]
+      ],
       "acrossRef": "Wall shared with Bedroom 2 (left) to the wall shared with Reception (right)",
-      "deepRef": "Wall with the top terrace (top) to the corridor wall (bottom)", "note": "Door to the top terrace" },
-    { "id": "bed2", "group": "Bedrooms", "en": "Bedroom 2", "ar": "غرفة نوم 2", "across": 4.04, "deep": 3.54, "area": 14.30, "areaSource": "computed", "rect": [[1.33, 1.67, 4.04, 3.54]],
+      "deepRef": "Wall with the top terrace (top) to the corridor wall (bottom)",
+      "note": "Door to the top terrace",
+      "acrossRefAr": "من الحائط المشترك مع غرفة النوم 2 (يسار) إلى الحائط المشترك مع الاستقبال (يمين)",
+      "deepRefAr": "من حائط التراس العلوي (أعلى) إلى حائط الممر (أسفل)",
+      "noteAr": "باب إلى التراس العلوي"
+    },
+    {
+      "id": "bed2",
+      "group": "Bedrooms",
+      "en": "Bedroom 2",
+      "ar": "غرفة نوم 2",
+      "across": 4.04,
+      "deep": 3.54,
+      "area": 14.3,
+      "areaSource": "computed",
+      "rect": [
+        [
+          1.33,
+          1.67,
+          4.04,
+          3.54
+        ]
+      ],
       "acrossRef": "Outer wall beside the small terrace (left) to the wall shared with Bedroom 1 (right)",
-      "deepRef": "Outer wall (top) to the corridor wall (bottom)" },
-    { "id": "bathA", "group": "Bathrooms", "en": "En-suite Bath", "ar": "حمام", "across": 1.88, "deep": 2.34, "area": 4.40, "areaSource": "computed", "rect": [[3.49, 6.59, 1.88, 2.34]],
+      "deepRef": "Outer wall (top) to the corridor wall (bottom)",
+      "acrossRefAr": "من الحائط الخارجي بجوار التراس الصغير (يسار) إلى الحائط المشترك مع غرفة النوم 1 (يمين)",
+      "deepRefAr": "من الحائط الخارجي (أعلى) إلى حائط الممر (أسفل)"
+    },
+    {
+      "id": "bathA",
+      "group": "Bathrooms",
+      "en": "En-suite Bath",
+      "ar": "حمام",
+      "across": 1.88,
+      "deep": 2.34,
+      "area": 4.4,
+      "areaSource": "computed",
+      "rect": [
+        [
+          3.49,
+          6.59,
+          1.88,
+          2.34
+        ]
+      ],
       "acrossRef": "Wall shared with the Master Bedroom (left) to the wall shared with the bathroom (right)",
-      "deepRef": "Vestibule wall (top) to the light well wall (bottom)", "note": "Part of the master suite" },
-    { "id": "bathB", "group": "Bathrooms", "en": "Bathroom", "ar": "حمام", "across": 1.88, "deep": 2.34, "area": 4.40, "areaSource": "computed", "rect": [[5.52, 6.59, 1.88, 2.34]],
+      "deepRef": "Vestibule wall (top) to the light well wall (bottom)",
+      "note": "Part of the master suite",
+      "arName": "حمام ملحق",
+      "acrossRefAr": "من الحائط المشترك مع غرفة النوم الرئيسية (يسار) إلى الحائط المشترك مع الحمام (يمين)",
+      "deepRefAr": "من حائط الردهة (أعلى) إلى حائط المنور (أسفل)",
+      "noteAr": "جزء من الجناح الرئيسي"
+    },
+    {
+      "id": "bathB",
+      "group": "Bathrooms",
+      "en": "Bathroom",
+      "ar": "حمام",
+      "across": 1.88,
+      "deep": 2.34,
+      "area": 4.4,
+      "areaSource": "computed",
+      "rect": [
+        [
+          5.52,
+          6.59,
+          1.88,
+          2.34
+        ]
+      ],
       "acrossRef": "Wall shared with the en-suite (left) to the wall shared with the kitchen (right)",
-      "deepRef": "Corridor wall (top) to the light well wall (bottom)" },
-    { "id": "wc", "group": "Bathrooms", "en": "Guest WC", "ar": "دورة مياه", "across": 2.29, "deep": 1.31, "area": 3.00, "areaSource": "computed", "rect": [[8.79, 9.08, 2.29, 1.31]],
+      "deepRef": "Corridor wall (top) to the light well wall (bottom)",
+      "acrossRefAr": "من الحائط المشترك مع الحمام الملحق (يسار) إلى الحائط المشترك مع المطبخ (يمين)",
+      "deepRefAr": "من حائط الممر (أعلى) إلى حائط المنور (أسفل)"
+    },
+    {
+      "id": "wc",
+      "group": "Bathrooms",
+      "en": "Guest WC",
+      "ar": "دورة مياه",
+      "across": 2.29,
+      "deep": 1.31,
+      "area": 3.0,
+      "areaSource": "computed",
+      "rect": [
+        [
+          8.79,
+          9.08,
+          2.29,
+          1.31
+        ]
+      ],
       "acrossRef": "Wall beside the light well (left) to the wall with the entrance lobby (right)",
-      "deepRef": "Kitchen wall (top) to the outer wall (bottom)" },
-    { "id": "lobby", "group": "Circulation", "en": "Entrance Lobby", "ar": "فراغ توزيع", "across": null, "deep": null, "area": 7.30, "areaSource": "given", "rect": [[11.23, 6.44, 2.36, 1.66], [11.23, 8.10, 1.50, 2.29]],
+      "deepRef": "Kitchen wall (top) to the outer wall (bottom)",
+      "arName": "دورة مياه الضيوف",
+      "acrossRefAr": "من الحائط المجاور للمنور (يسار) إلى حائط بهو المدخل (يمين)",
+      "deepRefAr": "من حائط المطبخ (أعلى) إلى الحائط الخارجي (أسفل)"
+    },
+    {
+      "id": "lobby",
+      "group": "Circulation",
+      "en": "Entrance Lobby",
+      "ar": "فراغ توزيع",
+      "across": null,
+      "deep": null,
+      "area": 7.3,
+      "areaSource": "given",
+      "rect": [
+        [
+          11.23,
+          6.44,
+          2.36,
+          1.66
+        ],
+        [
+          11.23,
+          8.1,
+          1.5,
+          2.29
+        ]
+      ],
       "acrossRef": "Area given only. Upper part: 2.36 m from the kitchen wall line to the outer wall, 1.66 m down from the reception opening. Lower part: 1.50 m from the guest WC wall to the lift shaft wall, 2.29 m down to the entrance wall.",
-      "deepRef": null },
-    { "id": "corridor", "group": "Circulation", "en": "Corridor", "ar": "فراغ توزيع", "across": 5.35, "deep": 1.08, "area": 5.78, "areaSource": "computed", "rect": [[4.14, 5.36, 5.41, 1.08]],
+      "deepRef": null,
+      "arName": "بهو المدخل",
+      "acrossRefAr": "المساحة فقط هي المعطاة. الجزء العلوي: 2.36 م من خط حائط المطبخ إلى الحائط الخارجي، و1.66 م نزولًا من فتحة الاستقبال. الجزء السفلي: 1.50 م من حائط دورة مياه الضيوف إلى حائط بئر المصعد، و2.29 م نزولًا حتى حائط المدخل.",
+      "deepRefAr": null
+    },
+    {
+      "id": "corridor",
+      "group": "Circulation",
+      "en": "Corridor",
+      "ar": "فراغ توزيع",
+      "across": 5.35,
+      "deep": 1.08,
+      "area": 5.78,
+      "areaSource": "computed",
+      "rect": [
+        [
+          4.14,
+          5.36,
+          5.41,
+          1.08
+        ]
+      ],
       "acrossRef": "Open edge with the suite vestibule (left) to the open edge with Reception (right)",
-      "deepRef": "Bedroom walls (top) to the bathroom and kitchen walls (bottom)" },
-    { "id": "vest", "group": "Circulation", "en": "Suite Vestibule", "ar": "توزيع", "across": 0.65, "deep": 1.08, "area": 0.70, "areaSource": "computed", "rect": [[3.49, 5.36, 0.65, 1.08]],
+      "deepRef": "Bedroom walls (top) to the bathroom and kitchen walls (bottom)",
+      "arName": "الممر",
+      "acrossRefAr": "من الحد المفتوح على ردهة الجناح (يسار) إلى الحد المفتوح على الاستقبال (يمين)",
+      "deepRefAr": "من حوائط غرف النوم (أعلى) إلى حوائط الحمام والمطبخ (أسفل)"
+    },
+    {
+      "id": "vest",
+      "group": "Circulation",
+      "en": "Suite Vestibule",
+      "ar": "توزيع",
+      "across": 0.65,
+      "deep": 1.08,
+      "area": 0.7,
+      "areaSource": "computed",
+      "rect": [
+        [
+          3.49,
+          5.36,
+          0.65,
+          1.08
+        ]
+      ],
       "acrossRef": "Master Bedroom wall (left) to the open edge with the corridor (right)",
-      "deepRef": "Bedroom 2 wall (top) to the en-suite wall (bottom)", "note": "Leads to the Master Bedroom and en-suite" },
-    { "id": "terrTop", "group": "Outdoor", "en": "Terrace", "ar": "تراس", "outdoor": true, "across": 3.92, "deep": 1.52, "area": 5.96, "areaSource": "computed", "rect": [[5.48, 0, 3.92, 1.52]],
+      "deepRef": "Bedroom 2 wall (top) to the en-suite wall (bottom)",
+      "note": "Leads to the Master Bedroom and en-suite",
+      "arName": "ردهة الجناح",
+      "acrossRefAr": "من حائط غرفة النوم الرئيسية (يسار) إلى الحد المفتوح على الممر (يمين)",
+      "deepRefAr": "من حائط غرفة النوم 2 (أعلى) إلى حائط الحمام الملحق (أسفل)",
+      "noteAr": "تؤدي إلى غرفة النوم الرئيسية والحمام الملحق"
+    },
+    {
+      "id": "terrTop",
+      "group": "Outdoor",
+      "en": "Terrace",
+      "ar": "تراس",
+      "outdoor": true,
+      "across": 3.92,
+      "deep": 1.52,
+      "area": 5.96,
+      "areaSource": "computed",
+      "rect": [
+        [
+          5.48,
+          0,
+          3.92,
+          1.52
+        ]
+      ],
       "acrossRef": "Railing (left) to the Reception wall (right)",
-      "deepRef": "Railing (top) to the Bedroom 1 wall (bottom)", "note": "Doors from Bedroom 1 and Reception" },
-    { "id": "terrSmall", "group": "Outdoor", "en": "Terrace", "ar": "تراس", "outdoor": true, "across": 1.18, "deep": 1.28, "area": 1.51, "areaSource": "computed", "rect": [[0, 3.93, 1.18, 1.28]],
+      "deepRef": "Railing (top) to the Bedroom 1 wall (bottom)",
+      "note": "Doors from Bedroom 1 and Reception",
+      "arName": "التراس العلوي",
+      "acrossRefAr": "من الدرابزين (يسار) إلى حائط الاستقبال (يمين)",
+      "deepRefAr": "من الدرابزين (أعلى) إلى حائط غرفة النوم 1 (أسفل)",
+      "noteAr": "بابان من غرفة النوم 1 والاستقبال"
+    },
+    {
+      "id": "terrSmall",
+      "group": "Outdoor",
+      "en": "Terrace",
+      "ar": "تراس",
+      "outdoor": true,
+      "across": 1.18,
+      "deep": 1.28,
+      "area": 1.51,
+      "areaSource": "computed",
+      "rect": [
+        [
+          0,
+          3.93,
+          1.18,
+          1.28
+        ]
+      ],
       "acrossRef": "Railing (left) to the Bedroom 2 wall (right)",
-      "deepRef": "Railing (top) to the Master Bedroom wall (bottom)", "note": "Door from the Master Bedroom" }
+      "deepRef": "Railing (top) to the Master Bedroom wall (bottom)",
+      "note": "Door from the Master Bedroom",
+      "arName": "التراس الصغير",
+      "acrossRefAr": "من الدرابزين (يسار) إلى حائط غرفة النوم 2 (يمين)",
+      "deepRefAr": "من الدرابزين (أعلى) إلى حائط غرفة النوم الرئيسية (أسفل)",
+      "noteAr": "باب من غرفة النوم الرئيسية"
+    }
   ],
-  "totals": { "indoor": 104.09, "terraces": 7.47, "total": 111.56 },
+  "totals": {
+    "indoor": 104.09,
+    "terraces": 7.47,
+    "total": 111.56
+  },
   "openingFormat": "geom = [wall direction h|v, wall face from, wall face to, opening from, opening to] in meters. Doors add [hinge at start, swing toward larger coordinate +1 or smaller -1].",
   "doors": [
-    { "between": ["bed2", "corridor"], "type": "hinged", "width": 0.80, "swingsInto": "bed2", "geom": ["h", 5.21, 5.36, 4.45, 5.25, false, -1] },
-    { "between": ["bed1", "corridor"], "type": "hinged", "width": 0.80, "swingsInto": "bed1", "geom": ["h", 5.21, 5.36, 5.62, 6.42, true, -1] },
-    { "between": ["bathA", "vest"], "type": "hinged", "width": 0.60, "swingsInto": "bathA", "geom": ["h", 6.44, 6.59, 3.52, 4.12, true, 1] },
-    { "between": ["bathB", "corridor"], "type": "hinged", "width": 0.70, "swingsInto": "bathB", "geom": ["h", 6.44, 6.59, 5.62, 6.32, true, 1] },
-    { "between": ["kitchen", "corridor"], "type": "hinged", "width": 0.80, "swingsInto": "kitchen", "geom": ["h", 6.44, 6.59, 7.65, 8.45, true, 1] },
-    { "between": ["master", "vest"], "type": "hinged", "width": 0.80, "swingsInto": "master", "geom": ["v", 3.34, 3.49, 5.48, 6.28, true, -1] },
-    { "between": ["wc", "lobby"], "type": "hinged", "width": 0.65, "swingsInto": "wc", "geom": ["v", 11.08, 11.23, 9.40, 10.05, false, -1] },
-    { "between": ["lobby", "outside"], "type": "hinged", "width": 1.00, "swingsInto": "lobby", "geom": ["h", 10.39, 10.54, 11.40, 12.40, true, -1], "note": "Main entrance" },
-    { "between": ["bed1", "terrTop"], "type": "sliding", "width": 1.90, "geom": ["h", 1.52, 1.67, 6.50, 8.40] },
-    { "between": ["reception", "terrTop"], "type": "sliding", "width": 1.12, "geom": ["v", 9.40, 9.55, 0.20, 1.32] },
-    { "between": ["master", "terrSmall"], "type": "sliding", "width": 0.94, "geom": ["h", 5.21, 5.36, 0.12, 1.06] }
+    {
+      "between": [
+        "bed2",
+        "corridor"
+      ],
+      "type": "hinged",
+      "width": 0.8,
+      "swingsInto": "bed2",
+      "geom": [
+        "h",
+        5.21,
+        5.36,
+        4.45,
+        5.25,
+        false,
+        -1
+      ]
+    },
+    {
+      "between": [
+        "bed1",
+        "corridor"
+      ],
+      "type": "hinged",
+      "width": 0.8,
+      "swingsInto": "bed1",
+      "geom": [
+        "h",
+        5.21,
+        5.36,
+        5.62,
+        6.42,
+        true,
+        -1
+      ]
+    },
+    {
+      "between": [
+        "bathA",
+        "vest"
+      ],
+      "type": "hinged",
+      "width": 0.6,
+      "swingsInto": "bathA",
+      "geom": [
+        "h",
+        6.44,
+        6.59,
+        3.52,
+        4.12,
+        true,
+        1
+      ]
+    },
+    {
+      "between": [
+        "bathB",
+        "corridor"
+      ],
+      "type": "hinged",
+      "width": 0.7,
+      "swingsInto": "bathB",
+      "geom": [
+        "h",
+        6.44,
+        6.59,
+        5.62,
+        6.32,
+        true,
+        1
+      ]
+    },
+    {
+      "between": [
+        "kitchen",
+        "corridor"
+      ],
+      "type": "hinged",
+      "width": 0.8,
+      "swingsInto": "kitchen",
+      "geom": [
+        "h",
+        6.44,
+        6.59,
+        7.65,
+        8.45,
+        true,
+        1
+      ]
+    },
+    {
+      "between": [
+        "master",
+        "vest"
+      ],
+      "type": "hinged",
+      "width": 0.8,
+      "swingsInto": "master",
+      "geom": [
+        "v",
+        3.34,
+        3.49,
+        5.48,
+        6.28,
+        true,
+        -1
+      ]
+    },
+    {
+      "between": [
+        "wc",
+        "lobby"
+      ],
+      "type": "hinged",
+      "width": 0.65,
+      "swingsInto": "wc",
+      "geom": [
+        "v",
+        11.08,
+        11.23,
+        9.4,
+        10.05,
+        false,
+        -1
+      ]
+    },
+    {
+      "between": [
+        "lobby",
+        "outside"
+      ],
+      "type": "hinged",
+      "width": 1.0,
+      "swingsInto": "lobby",
+      "geom": [
+        "h",
+        10.39,
+        10.54,
+        11.4,
+        12.4,
+        true,
+        -1
+      ],
+      "note": "Main entrance"
+    },
+    {
+      "between": [
+        "bed1",
+        "terrTop"
+      ],
+      "type": "sliding",
+      "width": 1.9,
+      "geom": [
+        "h",
+        1.52,
+        1.67,
+        6.5,
+        8.4
+      ]
+    },
+    {
+      "between": [
+        "reception",
+        "terrTop"
+      ],
+      "type": "sliding",
+      "width": 1.12,
+      "geom": [
+        "v",
+        9.4,
+        9.55,
+        0.2,
+        1.32
+      ]
+    },
+    {
+      "between": [
+        "master",
+        "terrSmall"
+      ],
+      "type": "sliding",
+      "width": 0.94,
+      "geom": [
+        "h",
+        5.21,
+        5.36,
+        0.12,
+        1.06
+      ]
+    }
   ],
   "windows": [
-    { "room": "bed2", "geom": ["h", 1.52, 1.67, 2.20, 4.40] },
-    { "room": "bed2", "geom": ["v", 1.18, 1.33, 2.20, 3.60] },
-    { "room": "reception", "geom": ["h", -0.05, 0.10, 10.30, 12.80] },
-    { "room": "reception", "geom": ["v", 13.59, 13.74, 1.20, 4.80] },
-    { "room": "master", "geom": ["v", -0.15, 0, 6.60, 9.20] },
-    { "room": "master", "geom": ["h", 10.33, 10.48, 0.80, 2.60] },
-    { "room": "bathA", "geom": ["h", 8.93, 9.08, 4.00, 4.90] },
-    { "room": "bathB", "geom": ["h", 8.93, 9.08, 6.00, 6.90] },
-    { "room": "kitchen", "geom": ["h", 8.93, 9.08, 7.70, 8.50] }
+    {
+      "room": "bed2",
+      "geom": [
+        "h",
+        1.52,
+        1.67,
+        2.2,
+        4.4
+      ]
+    },
+    {
+      "room": "bed2",
+      "geom": [
+        "v",
+        1.18,
+        1.33,
+        2.2,
+        3.6
+      ]
+    },
+    {
+      "room": "reception",
+      "geom": [
+        "h",
+        -0.05,
+        0.1,
+        10.3,
+        12.8
+      ]
+    },
+    {
+      "room": "reception",
+      "geom": [
+        "v",
+        13.59,
+        13.74,
+        1.2,
+        4.8
+      ]
+    },
+    {
+      "room": "master",
+      "geom": [
+        "v",
+        -0.15,
+        0,
+        6.6,
+        9.2
+      ]
+    },
+    {
+      "room": "master",
+      "geom": [
+        "h",
+        10.33,
+        10.48,
+        0.8,
+        2.6
+      ]
+    },
+    {
+      "room": "bathA",
+      "geom": [
+        "h",
+        8.93,
+        9.08,
+        4.0,
+        4.9
+      ]
+    },
+    {
+      "room": "bathB",
+      "geom": [
+        "h",
+        8.93,
+        9.08,
+        6.0,
+        6.9
+      ]
+    },
+    {
+      "room": "kitchen",
+      "geom": [
+        "h",
+        8.93,
+        9.08,
+        7.7,
+        8.5
+      ]
+    }
   ],
   "openEdges": [
-    { "between": ["vest", "corridor"], "line": [4.14, 5.36, 4.14, 6.44] },
-    { "between": ["corridor", "reception"], "line": [9.55, 5.36, 9.55, 6.44] },
-    { "between": ["reception", "lobby"], "line": [11.23, 6.44, 13.59, 6.44] }
+    {
+      "between": [
+        "vest",
+        "corridor"
+      ],
+      "line": [
+        4.14,
+        5.36,
+        4.14,
+        6.44
+      ]
+    },
+    {
+      "between": [
+        "corridor",
+        "reception"
+      ],
+      "line": [
+        9.55,
+        5.36,
+        9.55,
+        6.44
+      ]
+    },
+    {
+      "between": [
+        "reception",
+        "lobby"
+      ],
+      "line": [
+        11.23,
+        6.44,
+        13.59,
+        6.44
+      ]
+    }
   ],
   "outsideTheApartment": [
-    { "name": "Light well", "rect": [3.49, 9.08, 5.15, 1.25] },
-    { "name": "Lift / shaft", "rect": [12.88, 8.25, 0.86, 2.14] }
-  ]
+    {
+      "name": "Light well",
+      "rect": [
+        3.49,
+        9.08,
+        5.15,
+        1.25
+      ]
+    },
+    {
+      "name": "Lift / shaft",
+      "rect": [
+        12.88,
+        8.25,
+        0.86,
+        2.14
+      ]
+    }
+  ],
+  "languages": [
+    "en",
+    "ar"
+  ],
+  "i18n": {
+    "ar": {
+      "conventionsText": "كل مقاس هو مقاس داخلي صافٍ: من الوجه الداخلي لحائط إلى الوجه الداخلي للحائط المقابل، دون احتساب سُمك الحوائط. عندما تنفتح غرفة على مساحة أخرى بدون حائط، ينتهي المقاس عند الخط الذي تتوقف عنده الحوائط المجاورة، وهو مرسوم بخط متقطع. المقاسات مكتوبة بالعرض × بالعمق: العرض من اليسار إلى اليمين كما في الرسم، والعمق من أعلى إلى أسفل. المساحة = العرض × العمق مقرّبة إلى 0.01 م²، وبهو المدخل يستخدم المساحة المعطاة 7.3 م².",
+      "coordinatesText": "x = 0 عند الوجه الداخلي للحائط الأيسر لغرفة النوم الرئيسية، وy = 0 عند الدرابزين الخارجي للتراس العلوي. تزيد x نحو يمين الرسم، وتزيد y نحو أسفله. أعلى الرسم ليس بالضرورة اتجاه الشمال، لأن المسقط الأصلي لا يوضح الشمال. المساطر وشبكة المتر وقراءة المؤشر وأداة القياس كلها تستخدم هذه الإحداثيات.",
+      "method": [
+        "نُقلت مقاسات كل غرفة من البيانات المكتوبة على مسقط المطوّر.",
+        "طوبق كل رقمين مع الضلع الأطول والأقصر للغرفة بمقارنتهما بنسب الغرفة في الرسم الأصلي.",
+        "رُوجعت كل مطابقة مع الغرف المجاورة التي تشترك في خط الحائط نفسه: غرفتا النوم بعمق 3.54 م، والحمامان والمطبخ بعمق 2.34 م، والتراس العلوي 3.92 م بمحاذاة غرفة النوم 1 بعرض 3.88 م.",
+        "وُضعت الغرف بنفس ترتيب المسقط الأصلي، مع فصلها بحوائط بسُمك مفترض.",
+        "نُقلت مواضع الأبواب والشبابيك من الرسم الأصلي وقُدّرت عروضها.",
+        "حُسبت مساحة كل غرفة من بُعديها، وجُمعت المساحات للحصول على الإجماليات."
+      ],
+      "assumptions": [
+        {
+          "item": "سُمك الحوائط",
+          "value": "0.15 م",
+          "note": "غير مذكور في المسقط. استُخدم لكل الحوائط الداخلية والخارجية، لذلك فالمقاس الخارجي الكلي (حوالي 13.9 × 10.5 م شاملًا التراسات) تقريبي. مقاسات الغرف لا تتأثر."
+        },
+        {
+          "item": "طول الممر",
+          "value": "5.35 م مكتوب، 5.41 م مرسوم",
+          "note": "مع الحوائط المفترضة تصبح المسافة بين الردهة وفتحة الاستقبال 5.41 م، فيظهر الممر أطول بـ 6 سم من المكتوب. المقاس المعتمد هو 5.35 م."
+        },
+        {
+          "item": "شكل بهو المدخل",
+          "value": "2.36 × 1.66 + 1.50 × 2.29",
+          "note": "المعطى هو المساحة فقط. الشكل مأخوذ من الرسم الأصلي: جزء أعرض أسفل الاستقبال، وجزء أضيق بجوار دورة مياه الضيوف حتى المدخل. المساحة المرسومة 7.35 م²."
+        },
+        {
+          "item": "الحائط العلوي للاستقبال",
+          "value": "0.10 م أسفل خط درابزين التراس",
+          "note": "وُضع بحيث ينتهي عمق الاستقبال 6.34 م على نفس خط الممر وفتحة البهو."
+        },
+        {
+          "item": "عروض الأبواب",
+          "value": "0.80 م لغرف النوم والمطبخ، 0.60–0.70 م للحمامات، 0.65 م لدورة مياه الضيوف، 1.00 م للمدخل",
+          "note": "مقدّرة من الرسم."
+        },
+        {
+          "item": "الشبابيك والأبواب المنزلقة",
+          "value": "منقولة من الرسم",
+          "note": "المواضع والعروض تتبع الرسم الأصلي ولم تُقَس."
+        }
+      ]
+    }
+  }
 }
 </script>
 
 <div class="wrap">
-  <header>
-    <div class="eyebrow">Floor plan · drawn to scale · meters</div>
-    <h1>3-Bedroom Apartment Plan</h1>
-    <div class="stats" id="stats"></div>
+  <header class="top">
+    <div class="head-text">
+      <div class="eyebrow" data-i18n="eyebrow">Floor plan · drawn to scale · meters</div>
+      <h1 data-i18n="title">3-Bedroom Apartment Plan</h1>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="switches">
+      <div class="seg" role="group" data-i18n-aria="langGroup" aria-label="Language">
+        <button id="lang-en" lang="en" dir="ltr" aria-pressed="true">English</button>
+        <button id="lang-ar" lang="ar" dir="rtl" aria-pressed="false">العربية</button>
+      </div>
+      <div class="seg" role="group" data-i18n-aria="themeGroup" aria-label="Theme">
+        <button id="look-white" aria-pressed="true"><span class="dot dot-w"></span><span data-i18n="white">White</span></button>
+        <button id="look-black" aria-pressed="false"><span class="dot dot-b"></span><span data-i18n="black">Black</span></button>
+      </div>
+    </div>
   </header>
 
   <div class="studio">
-  <figure class="card" style="margin:0" aria-label="Floor plan">
-    <div class="card-top cap"><span>Fig 1 · Plan</span><span>1 square = 1 m</span></div>
+  <figure class="card" style="margin:0" data-i18n-aria="planTitle" aria-label="Floor plan">
+    <div class="card-top cap"><span data-i18n="figLabel">Fig 1 · Plan</span><span data-i18n="figScale">1 square = 1 m</span></div>
     <div class="plan-scroll">
-      <svg id="plan" viewBox="-115 -100 1525 1245" role="img" aria-label="Floor plan of the apartment drawn to scale in meters"></svg>
+      <svg id="plan" viewBox="-115 -100 1525 1245" role="img" data-i18n-aria="planAria" aria-label="Floor plan of the apartment drawn to scale in meters"></svg>
     </div>
     <div class="card-bot">
       <div class="ctl">
-        <button id="btn-grid" aria-pressed="true">Grid<kbd>G</kbd></button>
-        <button id="btn-measure" aria-pressed="false">Measure<kbd>M</kbd></button>
-        <button id="btn-clear">Clear<kbd>C</kbd></button>
+        <button id="btn-grid" aria-pressed="true"><span data-i18n="grid">Grid</span><kbd>G</kbd></button>
+        <button id="btn-measure" aria-pressed="false"><span data-i18n="measure">Measure</span><kbd>M</kbd></button>
+        <button id="btn-clear"><span data-i18n="clear">Clear</span><kbd>C</kbd></button>
         <span id="hint">Hover a room for its size.</span>
       </div>
       <span class="readout" id="readout">x – · y –</span>
     </div>
   </figure>
 
-  <aside class="panel" aria-label="Furniture">
+  <aside class="panel" data-i18n-aria="furniture" aria-label="Furniture">
     <div class="panel-sec">
-      <div class="cap"><span>Furniture</span><span class="save" id="save-status">Loading…</span></div>
-      <p class="small">Set a size in meters, then drag the piece onto the plan. Change the size and drag again for another copy.</p>
+      <div class="cap"><span data-i18n="furniture">Furniture</span><span class="save" id="save-status">Loading…</span></div>
+      <p class="small" data-i18n="furnIntro">Set a size in meters, then drag the piece onto the plan. Change the size and drag again for another copy.</p>
     </div>
     <div class="panel-sec insp-slot">
       <div id="insp-empty">
-        <div class="cap"><span>Selected</span></div>
-        <p class="small">Nothing selected. Click a piece on the plan to resize, rotate, flip, duplicate or remove it.</p>
-        <p class="small">Drag a piece to move it. Drag its corner square to resize it. Moves snap to 5 cm; hold Shift for 1 cm.</p>
+        <div class="cap"><span data-i18n="selected">Selected</span></div>
+        <p class="small" data-i18n="emptySel1">Nothing selected. Click a piece on the plan to resize, rotate, flip, duplicate or remove it.</p>
+        <p class="small" data-i18n="emptySel2">Drag a piece to move it. Drag its corner square to resize it. Moves snap to 5 cm; hold Shift for 1 cm.</p>
       </div>
       <div id="inspector" hidden>
-      <div class="cap"><span>Selected</span><button class="add" id="desel">Done</button></div>
-      <div class="insp-name" id="insp-name">Bed</div>
-      <div class="dims">
-        <label>L <input id="insp-l" type="number" min="0.3" max="8" step="0.05" inputmode="decimal" aria-label="Selected piece length in meters"></label>
-        <label>W <input id="insp-w" type="number" min="0.3" max="8" step="0.05" inputmode="decimal" aria-label="Selected piece width in meters"></label>
-        <span>m</span>
-      </div>
-      <div class="acts">
-        <button class="act" id="act-rot">Rotate 90°</button>
-        <button class="act" id="act-flip">Flip</button>
-        <button class="act" id="act-dup">Duplicate</button>
-        <button class="act" id="act-del">Remove</button>
-      </div>
-      <p class="small">Drag to move. Drag the corner square to resize. Keys: R rotate, F flip, D duplicate, Delete remove, arrows nudge 5 cm. Hold Shift for 1 cm steps.</p>
+        <div class="cap"><span data-i18n="selected">Selected</span><button class="add" id="desel" data-i18n="done">Done</button></div>
+        <div class="insp-name" id="insp-name"></div>
+        <div class="dims">
+          <label><span data-i18n="L">L</span><input id="insp-l" type="number" min="0.3" max="8" step="0.05" inputmode="decimal" dir="ltr" data-i18n-aria="inspLenAria" aria-label="Selected piece length in meters"></label>
+          <label><span data-i18n="W">W</span><input id="insp-w" type="number" min="0.3" max="8" step="0.05" inputmode="decimal" dir="ltr" data-i18n-aria="inspWidAria" aria-label="Selected piece width in meters"></label>
+          <span data-i18n="m">m</span>
+        </div>
+        <div class="acts">
+          <button class="act" id="act-rot" data-i18n="rot">Rotate 90°</button>
+          <button class="act" id="act-flip" data-i18n="flip">Flip</button>
+          <button class="act" id="act-dup" data-i18n="dup">Duplicate</button>
+          <button class="act" id="act-del" data-i18n="del">Remove</button>
+        </div>
+        <p class="small" data-i18n="inspHint">Drag to move. Drag the corner square to resize. Keys: R rotate, F flip, D duplicate, Delete remove, arrows nudge 5 cm. Hold Shift for 1 cm steps.</p>
       </div>
     </div>
     <div class="panel-sec"><div class="pal" id="palette"></div></div>
@@ -369,10 +1069,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   </div>
 
   <details class="rooms">
-    <summary><h2 id="rooms-h">Rooms</h2><span class="sum-meta" id="rooms-meta">13 spaces</span></summary>
+    <summary><h2 data-i18n="rooms">Rooms</h2><span class="sum-meta" id="rooms-meta">13 spaces</span></summary>
     <div class="table-scroll">
       <table>
-        <thead><tr><th>Space</th><th>Across (m), measured from → to</th><th>Deep (m), measured from → to</th><th>m²</th></tr></thead>
+        <thead><tr><th data-i18n="thSpace">Space</th><th data-i18n="thAcross">Across (m), measured from → to</th><th data-i18n="thDeep">Deep (m), measured from → to</th><th data-i18n="thArea">m²</th></tr></thead>
         <tbody id="rows"></tbody>
         <tfoot id="totals"></tfoot>
       </table>
@@ -380,35 +1080,23 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   </details>
 
   <details class="rooms">
-    <summary><h2 id="method-h">How this plan was measured</h2><span class="sum-meta">Method, assumptions, coordinates, data</span></summary>
-  <section class="method" aria-labelledby="method-h">
-    <div>
-      <div class="block">
-        <h3>What every size means</h3>
-        <p id="conv"></p>
+    <summary><h2 id="method-h" data-i18n="method">How this plan was measured</h2><span class="sum-meta" data-i18n="methodMeta">Method, assumptions, coordinates, data</span></summary>
+    <section class="method" aria-labelledby="method-h">
+      <div>
+        <div class="block"><h3 data-i18n="hMeans">What every size means</h3><p id="conv"></p></div>
+        <div class="block"><h3 data-i18n="hSteps">Steps</h3><ol id="steps"></ol></div>
+        <div class="block"><h3 data-i18n="hCoords">Coordinates</h3><p id="coords"></p></div>
       </div>
-      <div class="block">
-        <h3>Steps</h3>
-        <ol id="steps"></ol>
+      <div>
+        <div class="block"><h3 data-i18n="hAssume">Assumptions</h3><dl id="assume"></dl></div>
+        <div class="block">
+          <h3 data-i18n="hData">Plan data</h3>
+          <p style="margin:0 0 10px" data-i18n="dataNote">Every number on this page comes from one data block stored in the page itself.</p>
+          <button class="copy" id="copy" data-i18n="copy">Copy plan data (JSON)</button>
+          <details id="json-details"><summary data-i18n="showData">Show plan data</summary><pre id="json" dir="ltr"></pre></details>
+        </div>
       </div>
-      <div class="block">
-        <h3>Coordinates</h3>
-        <p id="coords"></p>
-      </div>
-    </div>
-    <div>
-      <div class="block">
-        <h3>Assumptions</h3>
-        <dl id="assume"></dl>
-      </div>
-      <div class="block">
-        <h3>Plan data</h3>
-        <p style="margin:0 0 10px">Every number on this page comes from one data block stored in the page itself.</p>
-        <button class="copy" id="copy">Copy plan data (JSON)</button>
-        <details id="json-details"><summary>Show plan data</summary><pre id="json"></pre></details>
-      </div>
-    </div>
-  </section>
+    </section>
   </details>
 </div>
 
@@ -428,15 +1116,95 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const ROOMS = D.rooms;
   const byId = Object.fromEntries(ROOMS.map(r => [r.id, r]));
-  const sizeText = r => r.across != null ? `${fmt(r.across)} × ${fmt(r.deep)}` : "7.3 m² given";
+  const AR = D.i18n.ar;
+  const TITLE_EN = document.title;
 
-  // Label placement only (presentation, not data)
-  const LABEL = {
-    kitchen: { dy: 0.12 }, bathA: { s: 0.78, dy: 0.28 }, bathB: { s: 0.78, dy: 0.28 },
-    wc: { s: 0.68, dx: -0.12 }, lobby: { s: 0.76, lines: ["en", "ar", "area"] },
-    corridor: { s: 0.78, lines: ["en", "ar", "dim"] }, vest: false,
-    terrTop: { s: 0.82 }, terrSmall: { s: 0.56, lines: ["en", "dim", "area"] },
+  // ---- Language ----
+  const STR = {
+    en: {
+      docTitle: TITLE_EN, eyebrow: "Floor plan · drawn to scale · meters", title: "3-Bedroom Apartment Plan",
+      langGroup: "Language", themeGroup: "Theme", white: "White", black: "Black",
+      planTitle: "Floor plan", planAria: "Floor plan of the apartment drawn to scale in meters",
+      figLabel: "Fig 1 · Plan", figScale: "1 square = 1 m", grid: "Grid", measure: "Measure", clear: "Clear",
+      hintHover: "Hover a room for its size.", hintMeasure: "Click two points. Snaps to 5 cm.",
+      m: "m", m2: "m²",
+      bedrooms: "bedrooms", baths: "bathrooms + guest WC", sIndoor: "m² indoor", sTerr: "m² terraces", sTotal: "m² total",
+      furniture: "Furniture", furnIntro: "Set a size in meters, then drag the piece onto the plan. Change the size and drag again for another copy.",
+      selected: "Selected", done: "Done",
+      emptySel1: "Nothing selected. Click a piece on the plan to resize, rotate, flip, duplicate or remove it.",
+      emptySel2: "Drag a piece to move it. Drag its corner square to resize it. Moves snap to 5 cm; hold Shift for 1 cm.",
+      rot: "Rotate 90°", flip: "Flip", dup: "Duplicate", del: "Remove",
+      inspHint: "Drag to move. Drag the corner square to resize. Keys: R rotate, F flip, D duplicate, Delete remove, arrows nudge 5 cm. Hold Shift for 1 cm steps.",
+      L: "L", W: "W", add: "Add",
+      dragAria: n => `Drag a ${n} onto the plan, or press Enter to add one`,
+      lenAria: n => `${n} length in meters`, widAria: n => `${n} width in meters`,
+      inspLenAria: "Selected piece length in meters", inspWidAria: "Selected piece width in meters",
+      clearAll: "Remove all furniture", clearArmed: n => `Click again to remove all ${n}`,
+      countNone: "Nothing placed yet.", count: n => `${n} ${n === 1 ? "piece" : "pieces"} on the plan.`,
+      type_bed: "Bed", type_lsofa: "L-Sofa", type_sofa: "Sofa", type_chair: "Chair", type_wardrobe: "Wardrobe", type_table: "Table",
+      save_loading: "Loading…", save_saving: "Saving…", save_saved: "Saved", save_none: "Nothing saved yet",
+      save_local: "Saved in this browser", save_localEmpty: "Saves in this browser", save_localFail: "Can't save in this browser",
+      save_readonly: "View only. Changes aren't saved", save_full: "Storage is full. Not saved",
+      save_retry: "Couldn't save. Will retry on the next change", save_slow: "Can't reach the saved layout yet",
+      save_off: "Saving is off for this view", save_unreach: "Can't reach the saved layout",
+      rooms: "Rooms", roomsMeta: (n, a) => `${n} spaces · ${a} m² indoor`,
+      thSpace: "Space", thAcross: "Across (m), measured from → to", thDeep: "Deep (m), measured from → to", thArea: "m²",
+      areaOnly: "Area only", lobbyGiven: "7.3 m² given",
+      totIndoor: "Indoor (all rooms except terraces)", totTerr: "Terraces", totAll: "Total net area",
+      method: "How this plan was measured", methodMeta: "Method, assumptions, coordinates, data",
+      hMeans: "What every size means", hSteps: "Steps", hCoords: "Coordinates", hAssume: "Assumptions", hData: "Plan data",
+      dataNote: "Every number on this page comes from one data block stored in the page itself.",
+      copy: "Copy plan data (JSON)", copied: "Copied", copySel: "Selected below. Press Cmd/Ctrl+C", showData: "Show plan data",
+      lightwell: "Light well (not part of the apartment)", lift1: "Lift /", lift2: "shaft", entrance: "ENTRANCE",
+    },
+    ar: {
+      docTitle: "مسقط شقة 3 غرف نوم", eyebrow: "مسقط أفقي · بمقياس رسم · بالمتر", title: "مسقط شقة 3 غرف نوم",
+      langGroup: "اللغة", themeGroup: "المظهر", white: "أبيض", black: "أسود",
+      planTitle: "المسقط", planAria: "مسقط الشقة مرسوم بمقياس رسم بالمتر",
+      figLabel: "شكل 1 · المسقط", figScale: "المربع = 1 م", grid: "الشبكة", measure: "قياس", clear: "مسح",
+      hintHover: "مرّر المؤشر على غرفة لمعرفة مقاسها.", hintMeasure: "اضغط على نقطتين. القياس كل 5 سم.",
+      m: "م", m2: "م²",
+      bedrooms: "غرف نوم", baths: "حمام + دورة مياه للضيوف", sIndoor: "م² داخلي", sTerr: "م² تراسات", sTotal: "م² إجمالي",
+      furniture: "الأثاث", furnIntro: "حدّد المقاس بالمتر، ثم اسحب القطعة إلى المسقط. غيّر المقاس واسحب مرة أخرى لإضافة نسخة جديدة.",
+      selected: "المحدد", done: "تم",
+      emptySel1: "لا توجد قطعة محددة. اضغط على قطعة في المسقط لتغيير مقاسها أو تدويرها أو قلبها أو نسخها أو حذفها.",
+      emptySel2: "اسحب القطعة لتحريكها، واسحب المربع في ركنها لتغيير مقاسها. الحركة كل 5 سم، ومع Shift كل 1 سم.",
+      rot: "تدوير 90°", flip: "قلب", dup: "نسخ", del: "حذف",
+      inspHint: "اسحب لتحريك القطعة، واسحب المربع في ركنها لتغيير المقاس. المفاتيح: R تدوير، F قلب، D نسخ، Delete حذف، والأسهم للتحريك 5 سم. Shift للتحريك كل 1 سم.",
+      L: "ط", W: "ع", add: "إضافة",
+      dragAria: n => `اسحب ${n} إلى المسقط، أو اضغط Enter لإضافته`,
+      lenAria: n => `طول ${n} بالمتر`, widAria: n => `عرض ${n} بالمتر`,
+      inspLenAria: "طول القطعة المحددة بالمتر", inspWidAria: "عرض القطعة المحددة بالمتر",
+      clearAll: "حذف كل الأثاث", clearArmed: n => `اضغط مرة أخرى لحذف كل القطع (${n})`,
+      countNone: "لم تُضف أي قطعة بعد.", count: n => `عدد القطع على المسقط: ${n}`,
+      type_bed: "سرير", type_lsofa: "كنبة زاوية", type_sofa: "كنبة", type_chair: "كرسي", type_wardrobe: "دولاب", type_table: "طاولة",
+      save_loading: "جارٍ التحميل…", save_saving: "جارٍ الحفظ…", save_saved: "تم الحفظ", save_none: "لا يوجد حفظ بعد",
+      save_local: "محفوظ في هذا المتصفح", save_localEmpty: "يُحفظ في هذا المتصفح", save_localFail: "تعذّر الحفظ في هذا المتصفح",
+      save_readonly: "عرض فقط، التغييرات لا تُحفظ", save_full: "المساحة ممتلئة، لم يتم الحفظ",
+      save_retry: "تعذّر الحفظ، ستُعاد المحاولة مع التغيير التالي", save_slow: "تعذّر الوصول إلى التخطيط المحفوظ حتى الآن",
+      save_off: "الحفظ متوقف في هذا العرض", save_unreach: "تعذّر الوصول إلى التخطيط المحفوظ",
+      rooms: "الغرف", roomsMeta: (n, a) => `${n} مساحة · ${a} م² داخلي`,
+      thSpace: "المساحة", thAcross: "بالعرض (م)، يُقاس من ← إلى", thDeep: "بالعمق (م)، يُقاس من ← إلى", thArea: "م²",
+      areaOnly: "المساحة فقط", lobbyGiven: "7.3 م² (معطاة)",
+      totIndoor: "داخلي (كل الغرف عدا التراسات)", totTerr: "التراسات", totAll: "إجمالي المساحة الصافية",
+      method: "كيف تم قياس هذا المسقط", methodMeta: "الطريقة، الافتراضات، الإحداثيات، البيانات",
+      hMeans: "معنى كل مقاس", hSteps: "الخطوات", hCoords: "الإحداثيات", hAssume: "الافتراضات", hData: "بيانات المسقط",
+      dataNote: "كل رقم في هذه الصفحة مأخوذ من كتلة بيانات واحدة محفوظة داخل الصفحة نفسها.",
+      copy: "نسخ بيانات المسقط (JSON)", copied: "تم النسخ", copySel: "تم التحديد بالأسفل، اضغط Cmd/Ctrl+C", showData: "عرض بيانات المسقط",
+      lightwell: "منور (ليس جزءًا من الشقة)", lift1: "مصعد /", lift2: "بئر", entrance: "المدخل",
+    },
   };
+  const lsGet = k => { try { return localStorage.getItem(k); } catch (_) { return null; } };
+  const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} };
+  const LS_LANG = "apartment-plan-lang", LS_LOOK = "apartment-plan-look-" + D.variant;
+  let lang = document.documentElement.lang === "ar" ? "ar" : "en";
+  const t = (k, ...a) => { let v = STR[lang][k]; if (v === undefined) v = STR.en[k]; return typeof v === "function" ? v(...a) : v; };
+  const isAr = () => lang === "ar";
+  const nameOf = r => isAr() ? (r.arName || r.ar) : r.en;
+  const altOf = r => isAr() ? r.en : r.ar;
+  const typeName = k => t("type_" + k);
+  const sizeText = r => r.across != null ? `${fmt(r.across)} × ${fmt(r.deep)}` : t("lobbyGiven");
+  const dimText = r => r.across != null ? `${sizeText(r)} ${t("m")}` : sizeText(r);
 
   // ---- Layers ----
   const defs = el("defs", {}, svg);
@@ -486,9 +1254,9 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     const [o, w1, w2, a1, a2, hs, side] = d.geom;
     gapRect(o, w1, w2, a1, a2);
     if (d.type === "sliding") {
-      const t = w2 - w1, L = a2 - a1;
-      line(P(o, a1, w1 + t * 0.32), P(o, a1 + L * 0.58, w1 + t * 0.32), "slide");
-      line(P(o, a2 - L * 0.58, w1 + t * 0.68), P(o, a2, w1 + t * 0.68), "slide");
+      const th = w2 - w1, L = a2 - a1;
+      line(P(o, a1, w1 + th * 0.32), P(o, a1 + L * 0.58, w1 + th * 0.32), "slide");
+      line(P(o, a2 - L * 0.58, w1 + th * 0.68), P(o, a2, w1 + th * 0.68), "slide");
       return;
     }
     const L = a2 - a1, ha = hs ? a1 : a2, oa = hs ? a2 : a1, face = side > 0 ? w2 : w1;
@@ -513,106 +1281,129 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   for (let i = 0; i <= 28; i++) el("line", { x1: m(i / 2), y1: 0, x2: m(i / 2), y2: m(11), class: "gridl" + (i % 2 ? "" : " major") }, gGrid);
   for (let i = 0; i <= 22; i++) el("line", { x1: 0, y1: m(i / 2), x2: m(14), y2: m(i / 2), class: "gridl" + (i % 2 ? "" : " major") }, gGrid);
 
-  // Room labels
-  ROOMS.forEach(r => {
-    const o = LABEL[r.id] === undefined ? {} : LABEL[r.id];
-    if (o === false) return;
-    const s = o.s || 1;
-    const [x, y, w, h] = r.rect[0];
-    const cx = x + w / 2 + (o.dx || 0), cy = y + h / 2 + (o.dy || 0);
-    const spec = {
-      en: { cls: "t-en", size: 30, text: r.en },
-      ar: { cls: "t-ar", size: 22, text: r.ar },
-      dim: { cls: "t-dim", size: 20, text: `${sizeText(r)} m` },
-      area: { cls: "t-area", size: 18, text: `${fmt(r.area)} m²` },
-    };
-    const lines = (o.lines || ["en", "ar", "dim", "area"]).map(k => spec[k]);
-    const gap = 6 * s;
-    const total = lines.reduce((t, l) => t + l.size * s, 0) + gap * (lines.length - 1);
-    let yy = m(cy) - total / 2;
-    lines.forEach(l => {
-      const fs = l.size * s;
-      const t = el("text", { x: m(cx), y: +(yy + fs * 0.8).toFixed(1), class: l.cls, "font-size": +fs.toFixed(1), "text-anchor": "middle" }, gLab);
-      if (l.cls === "t-ar") t.setAttribute("direction", "rtl");
-      t.textContent = l.text;
-      yy += fs + gap;
-    });
-  });
-  const note = (x, y, text) => { const t = el("text", { x: m(x), y: m(y), class: "t-note", "text-anchor": "middle" }, gLab); t.textContent = text; };
-  note(6.07, 9.76, "Light well (not part of the apartment)");
-  note(13.31, 9.38, "Lift /"); note(13.31, 9.56, "shaft");
-  el("path", { d: `M${m(11.9)},${m(10.62)} l${m(0.13)},${m(0.2)} l${m(-0.26)},0 z`, class: "arrow" }, gLab);
-  const ent = el("text", { x: m(11.9), y: m(11.08), class: "t-tag", "text-anchor": "middle" }, gLab); ent.textContent = "ENTRANCE";
-
   // Rulers and scale bar
   const rl = (x1, y1, x2, y2) => el("line", { x1: m(x1), y1: m(y1), x2: m(x2), y2: m(y2) }, gRul);
-  const rt = (x, y, text, anchor) => { const t = el("text", { x: m(x), y: m(y), "text-anchor": anchor }, gRul); t.textContent = text; };
+  const rt = (x, y, text, anchor) => { const tx = el("text", { x: m(x), y: m(y), "text-anchor": anchor }, gRul); tx.textContent = text; return tx; };
   rl(0, -0.5, 14, -0.5); rl(-0.5, 0, -0.5, 11);
   for (let i = 0; i <= 28; i++) { const v = i / 2, maj = i % 2 === 0; rl(v, -0.5, v, maj ? -0.68 : -0.6); if (maj) rt(v, -0.76, String(v), "middle"); }
   for (let i = 0; i <= 22; i++) { const v = i / 2, maj = i % 2 === 0; rl(-0.5, v, maj ? -0.68 : -0.6, v); if (maj) rt(-0.74, v + 0.06, String(v), "end"); }
-  rt(14.12, -0.76, "m", "start");
+  const rulerUnit = rt(14.12, -0.76, "m", "start");
   for (let i = 0; i < 4; i++) el("rect", { x: m(i), y: m(10.8), width: m(1), height: m(0.11), class: i % 2 ? "sb-b" : "sb-a" }, gRul);
-  for (let i = 0; i <= 4; i++) rt(i, 11.13, i === 4 ? "4 m" : String(i), "middle");
+  let scaleEnd = null;
+  for (let i = 0; i <= 4; i++) { const tx = rt(i, 11.13, String(i), "middle"); if (i === 4) scaleEnd = tx; }
+
+  // Room labels (rebuilt when the language changes)
+  const LABEL = {
+    kitchen: { dy: 0.12 }, bathA: { s: 0.78, dy: 0.28 }, bathB: { s: 0.78, dy: 0.28 },
+    wc: { s: 0.68, dx: -0.12 }, lobby: { s: 0.76, lines: ["en", "ar", "area"] },
+    corridor: { s: 0.78, lines: ["en", "ar", "dim"] }, vest: false,
+    terrTop: { s: 0.82 }, terrSmall: { s: 0.56, lines: ["en", "dim", "area"] },
+  };
+  function renderLabels() {
+    gLab.replaceChildren();
+    const ar = isAr();
+    ROOMS.forEach(r => {
+      const o = LABEL[r.id] === undefined ? {} : LABEL[r.id];
+      if (o === false) return;
+      const s = o.s || 1;
+      const [x, y, w, h] = r.rect[0];
+      const cx = x + w / 2 + (o.dx || 0), cy = y + h / 2 + (o.dy || 0);
+      const spec = {
+        en: { cls: "t-en", size: 30, text: nameOf(r), rtl: ar },
+        ar: { cls: "t-ar", size: 22, text: altOf(r), rtl: !ar },
+        dim: { cls: "t-dim", size: 20, text: dimText(r), rtl: ar },
+        area: { cls: "t-area", size: 18, text: `${fmt(r.area)} ${t("m2")}`, rtl: ar },
+      };
+      const lines = (o.lines || ["en", "ar", "dim", "area"]).map(k => spec[k]);
+      const gap = 6 * s;
+      const total = lines.reduce((sum, l) => sum + l.size * s, 0) + gap * (lines.length - 1);
+      let yy = m(cy) - total / 2;
+      lines.forEach(l => {
+        const fs = l.size * s;
+        const tx = el("text", { x: m(cx), y: +(yy + fs * 0.8).toFixed(1), class: l.cls, "font-size": +fs.toFixed(1), "text-anchor": "middle", direction: l.rtl ? "rtl" : "ltr" }, gLab);
+        tx.textContent = l.text;
+        yy += fs + gap;
+      });
+    });
+    const note = (x, y, text) => { const tx = el("text", { x: m(x), y: m(y), class: "t-note", "text-anchor": "middle", direction: ar ? "rtl" : "ltr" }, gLab); tx.textContent = text; };
+    note(6.07, 9.76, t("lightwell"));
+    note(13.31, 9.38, t("lift1")); note(13.31, 9.56, t("lift2"));
+    el("path", { d: `M${m(11.9)},${m(10.62)} l${m(0.13)},${m(0.2)} l${m(-0.26)},0 z`, class: "arrow" }, gLab);
+    const ent = el("text", { x: m(11.9), y: m(11.08), class: "t-tag", "text-anchor": "middle", direction: ar ? "rtl" : "ltr" }, gLab);
+    ent.textContent = t("entrance");
+    rulerUnit.textContent = t("m");
+    scaleEnd.textContent = `4 ${t("m")}`;
+  }
 
   // ---- Stats, room table, method ----
   const indoor = ROOMS.filter(r => !r.outdoor).reduce((s, r) => s + r.area, 0);
   const outdoor = ROOMS.filter(r => r.outdoor).reduce((s, r) => s + r.area, 0);
-  document.getElementById("stats").innerHTML =
-    `<span><b>3</b> bedrooms</span><span><b>2</b> bathrooms + guest WC</span><span><b>${fmt(indoor)}</b> m² indoor</span><span><b>${fmt(outdoor)}</b> m² terraces</span><span><b>${fmt(indoor + outdoor)}</b> m² total</span>`;
-
+  function renderStats() {
+    document.getElementById("stats").innerHTML =
+      `<span><b>3</b> ${t("bedrooms")}</span><span><b>2</b> ${t("baths")}</span><span><b>${fmt(indoor)}</b> ${t("sIndoor")}</span><span><b>${fmt(outdoor)}</b> ${t("sTerr")}</span><span><b>${fmt(indoor + outdoor)}</b> ${t("sTotal")}</span>`;
+  }
   const rows = document.getElementById("rows");
-  ROOMS.forEach(r => {
-    const tr = document.createElement("tr");
-    tr.className = "row"; tr.tabIndex = 0; tr.dataset.room = r.id;
-    const name = `<td><span class="en">${esc(r.en)}</span><span class="ar" dir="rtl">${esc(r.ar)}</span>${r.note ? `<span class="note">${esc(r.note)}</span>` : ""}</td>`;
-    const dims = r.across != null
-      ? `<td><span class="num">${fmt(r.across)}</span><span class="ref">${esc(r.acrossRef)}</span></td><td><span class="num">${fmt(r.deep)}</span><span class="ref">${esc(r.deepRef)}</span></td>`
-      : `<td colspan="2"><span class="num">Area only</span><span class="ref">${esc(r.acrossRef)}</span></td>`;
-    tr.innerHTML = name + dims + `<td class="num">${fmt(r.area)}</td>`;
-    rows.appendChild(tr);
-  });
-  document.getElementById("totals").innerHTML =
-    `<tr><td colspan="3">Indoor (all rooms except terraces)</td><td class="num">${fmt(indoor)}</td></tr>
-     <tr><td colspan="3">Terraces</td><td class="num">${fmt(outdoor)}</td></tr>
-     <tr><td colspan="3">Total net area</td><td class="num">${fmt(indoor + outdoor)}</td></tr>`;
-
-  const C = D.conventions;
-  document.getElementById("conv").textContent = `${C.dimension} ${C.openSides} Sizes are written across × deep: across is left to right as drawn, deep is top to bottom. ${C.area}`;
-  document.getElementById("steps").innerHTML = D.method.map(s => `<li>${esc(s)}</li>`).join("");
-  const K = D.coordinateSystem;
-  document.getElementById("coords").textContent = `${K.origin} ${K.x} ${K.y} ${K.orientation} ${K.usedBy}`;
-  document.getElementById("assume").innerHTML = D.assumptions.map(a => `<div><dt>${esc(a.item)}<span class="num">${esc(a.value)}</span></dt><dd>${esc(a.note)}</dd></div>`).join("");
+  let hotId = null, coordP = null;
+  function renderTable() {
+    const ar = isAr();
+    rows.innerHTML = ROOMS.map(r => {
+      const note = ar ? r.noteAr : r.note;
+      const aRef = ar ? r.acrossRefAr : r.acrossRef, dRef = ar ? r.deepRefAr : r.deepRef;
+      const name = `<td><span class="en">${esc(nameOf(r))}</span><span class="ar" dir="${ar ? "ltr" : "rtl"}">${esc(altOf(r))}</span>${note ? `<span class="note">${esc(note)}</span>` : ""}</td>`;
+      const dims = r.across != null
+        ? `<td><span class="num">${fmt(r.across)}</span><span class="ref">${esc(aRef)}</span></td><td><span class="num">${fmt(r.deep)}</span><span class="ref">${esc(dRef)}</span></td>`
+        : `<td colspan="2"><span class="num">${esc(t("areaOnly"))}</span><span class="ref">${esc(aRef)}</span></td>`;
+      return `<tr class="row${r.id === hotId ? " hot" : ""}" tabindex="0" data-room="${r.id}">${name}${dims}<td class="num">${fmt(r.area)}</td></tr>`;
+    }).join("");
+    document.getElementById("totals").innerHTML =
+      `<tr><td colspan="3">${esc(t("totIndoor"))}</td><td class="num">${fmt(indoor)}</td></tr>
+       <tr><td colspan="3">${esc(t("totTerr"))}</td><td class="num">${fmt(outdoor)}</td></tr>
+       <tr><td colspan="3">${esc(t("totAll"))}</td><td class="num">${fmt(indoor + outdoor)}</td></tr>`;
+    document.getElementById("rooms-meta").textContent = t("roomsMeta", ROOMS.length, fmt(indoor));
+  }
+  function renderMethod() {
+    const ar = isAr(), C = D.conventions, K = D.coordinateSystem;
+    document.getElementById("conv").textContent = ar ? AR.conventionsText
+      : `${C.dimension} ${C.openSides} Sizes are written across × deep: across is left to right as drawn, deep is top to bottom. ${C.area}`;
+    document.getElementById("steps").innerHTML = (ar ? AR.method : D.method).map(s => `<li>${esc(s)}</li>`).join("");
+    document.getElementById("coords").textContent = ar ? AR.coordinatesText : `${K.origin} ${K.x} ${K.y} ${K.orientation} ${K.usedBy}`;
+    document.getElementById("assume").innerHTML = (ar ? AR.assumptions : D.assumptions)
+      .map(a => `<div><dt>${esc(a.item)}<span class="num">${esc(a.value)}</span></dt><dd>${esc(a.note)}</dd></div>`).join("");
+  }
   const jsonText = JSON.stringify(D, null, 2);
   document.getElementById("json").textContent = jsonText;
   const copyBtn = document.getElementById("copy");
   copyBtn.addEventListener("click", () => {
-    const done = msg => { copyBtn.textContent = msg; setTimeout(() => { copyBtn.textContent = "Copy plan data (JSON)"; }, 2200); };
+    const done = msg => { copyBtn.textContent = msg; setTimeout(() => { copyBtn.textContent = t("copy"); }, 2200); };
     const fallback = () => {
       document.getElementById("json-details").open = true;
       const sel = window.getSelection(), rng = document.createRange();
       rng.selectNodeContents(document.getElementById("json")); sel.removeAllRanges(); sel.addRange(rng);
-      done("Selected below. Press Cmd/Ctrl+C");
+      done(t("copySel"));
     };
-    try { navigator.clipboard.writeText(jsonText).then(() => done("Copied"), fallback); } catch (e) { fallback(); }
+    try { navigator.clipboard.writeText(jsonText).then(() => done(t("copied")), fallback); } catch (e) { fallback(); }
   });
 
   // ---- Hover linking and readout ----
   const readout = document.getElementById("readout");
-  let hotId = null, coordText = "x – · y –";
-  const paint = () => {
+  function paint() {
     const r = hotId && byId[hotId];
-    readout.textContent = r ? `${r.en} · ${sizeText(r)}${r.across != null ? " m" : ""} · ${fmt(r.area)} m²` : coordText;
-  };
-  const setHot = id => {
+    readout.textContent = r ? `${nameOf(r)} · ${dimText(r)} · ${fmt(r.area)} ${t("m2")}`
+      : coordP ? `x ${fmt(coordP.x)} · y ${fmt(coordP.y)} ${t("m")}` : "x – · y –";
+  }
+  function setHot(id) {
     hotId = id;
     document.querySelectorAll("[data-room]").forEach(n => n.classList.toggle("hot", n.dataset.room === id));
     paint();
-  };
-  document.querySelectorAll("[data-room]").forEach(n => {
+  }
+  gFloor.querySelectorAll("[data-room]").forEach(n => {
     n.addEventListener("pointerenter", () => setHot(n.dataset.room));
     n.addEventListener("pointerleave", () => setHot(null));
-    if (n.tagName === "TR") { n.addEventListener("focus", () => setHot(n.dataset.room)); n.addEventListener("blur", () => setHot(null)); }
   });
+  rows.addEventListener("pointerover", e => { const tr = e.target.closest("tr.row"); if (tr && tr.dataset.room !== hotId) setHot(tr.dataset.room); });
+  rows.addEventListener("pointerleave", () => setHot(null));
+  rows.addEventListener("focusin", e => { const tr = e.target.closest("tr.row"); if (tr) setHot(tr.dataset.room); });
+  rows.addEventListener("focusout", () => setHot(null));
 
   // ---- Controls ----
   const btnGrid = document.getElementById("btn-grid"), btnMeasure = document.getElementById("btn-measure");
@@ -623,6 +1414,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   let measuring = false, pending = null, cursor = null;
   const done = [];
   const hint = document.getElementById("hint");
+  const renderHint = () => { hint.textContent = measuring ? t("hintMeasure") : t("hintHover"); };
   const toPlan = e => {
     const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
     const r = pt.matrixTransform(svg.getScreenCTM().inverse());
@@ -632,8 +1424,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   const drawPair = (a, b) => {
     el("line", { x1: m(a.x), y1: m(a.y), x2: m(b.x), y2: m(b.y), class: "m-line" }, gMeas);
     [a, b].forEach(p => el("circle", { cx: m(p.x), cy: m(p.y), r: 6, class: "m-dot" }, gMeas));
-    const t = el("text", { x: m((a.x + b.x) / 2), y: m((a.y + b.y) / 2) - 12, class: "m-text", "text-anchor": "middle" }, gMeas);
-    t.textContent = `${fmt(Math.hypot(b.x - a.x, b.y - a.y))} m`;
+    const tx = el("text", { x: m((a.x + b.x) / 2), y: m((a.y + b.y) / 2) - 12, class: "m-text", "text-anchor": "middle", direction: isAr() ? "rtl" : "ltr" }, gMeas);
+    tx.textContent = `${fmt(Math.hypot(b.x - a.x, b.y - a.y))} ${t("m")}`;
   };
   const redraw = () => {
     gMeas.replaceChildren();
@@ -645,19 +1437,18 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     measuring = on; pending = null; cursor = null; redraw();
     if (on) select(null);
     setPressed(btnMeasure, on); svg.classList.toggle("measuring", on);
-    hint.textContent = on ? "Click two points. Snaps to 5 cm." : "Hover a room for its size.";
+    renderHint();
   };
   const clearAll = () => { done.length = 0; pending = null; cursor = null; redraw(); };
   btnMeasure.addEventListener("click", () => setMeasure(!measuring));
   document.getElementById("btn-clear").addEventListener("click", clearAll);
 
   svg.addEventListener("pointermove", e => {
-    const p = toPlan(e);
-    coordText = `x ${fmt(p.x)} · y ${fmt(p.y)} m`;
-    if (measuring && pending) { cursor = snap(p); redraw(); }
+    coordP = toPlan(e);
+    if (measuring && pending) { cursor = snap(coordP); redraw(); }
     paint();
   });
-  svg.addEventListener("pointerleave", () => { coordText = "x – · y –"; paint(); });
+  svg.addEventListener("pointerleave", () => { coordP = null; paint(); });
   svg.addEventListener("pointerdown", e => {
     if (!measuring) return;
     const p = snap(toPlan(e));
@@ -675,19 +1466,13 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     else if (k === "escape" && pending) { pending = null; cursor = null; redraw(); }
   });
 
-  document.getElementById("rooms-meta").textContent = `${ROOMS.length} spaces · ${fmt(indoor)} m² indoor`;
-
   // =====================================================================
   // Furniture: palette with sizes, drag a copy onto the plan, move,
   // resize, rotate, flip, duplicate, remove. Sizes in meters.
   // =====================================================================
   const TYPES = {
-    bed:      { name: "Bed",      L: 2.00, W: 1.60 },
-    lsofa:    { name: "L-Sofa",   L: 2.80, W: 2.00 },
-    sofa:     { name: "Sofa",     L: 2.10, W: 0.90 },
-    chair:    { name: "Chair",    L: 0.50, W: 0.50 },
-    wardrobe: { name: "Wardrobe", L: 1.80, W: 0.60 },
-    table:    { name: "Table",    L: 1.60, W: 0.90 },
+    bed: { L: 2.00, W: 1.60 }, lsofa: { L: 2.80, W: 2.00 }, sofa: { L: 2.10, W: 0.90 },
+    chair: { L: 0.50, W: 0.50 }, wardrobe: { L: 1.80, W: 0.60 }, table: { L: 1.60, W: 0.90 },
   };
   const MIN = 0.3, MAX = 8;
   const r2 = v => Math.round(v * 100) / 100;
@@ -733,8 +1518,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       s += R(cx0 + 1.5, y0 + b + 1.5, inner - 3, inner - 3, "f-b", 4);
       const tl = cx0 - (x0 + a);
       if (tl > 6) { const n = Math.max(1, Math.round(tl / 65)), tw = tl / n; for (let i = 0; i < n; i++) s += R(x0 + a + i * tw + 1.5, y0 + b + 1.5, tw - 3, inner - 3, "f-b", 4); }
-      const rl = (y0 + h - a) - (y0 + d);
-      if (rl > 6) { const n = Math.max(1, Math.round(rl / 65)), rw = rl / n; for (let i = 0; i < n; i++) s += R(cx0 + 1.5, y0 + d + i * rw + 1.5, inner - 3, rw - 3, "f-b", 4); }
+      const rlen = (y0 + h - a) - (y0 + d);
+      if (rlen > 6) { const n = Math.max(1, Math.round(rlen / 65)), rw = rlen / n; for (let i = 0; i < n; i++) s += R(cx0 + 1.5, y0 + d + i * rw + 1.5, inner - 3, rw - 3, "f-b", 4); }
     } else if (type === "chair") {
       const b = Math.max(6, h * 0.16);
       s += R(x0 + 2, y0 + b * 0.6, w - 4, h - b * 0.6, "f-b", 6);
@@ -759,48 +1544,50 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   };
 
   // ---- State ----
-  let palette = Object.fromEntries(Object.entries(TYPES).map(([k, t]) => [k, [t.L, t.W]]));
+  let palette = Object.fromEntries(Object.entries(TYPES).map(([k, v]) => [k, [v.L, v.W]]));
   let items = [];
   let selId = null, fdrag = null, dirty = false;
   const newId = () => Math.random().toString(36).slice(2, 10);
   const planScroll = document.querySelector(".plan-scroll");
   const inspector = document.getElementById("inspector");
+  const inspEmpty = document.getElementById("insp-empty");
   const inspName = document.getElementById("insp-name");
   const inspL = document.getElementById("insp-l"), inspW = document.getElementById("insp-w");
   const countEl = document.getElementById("furn-count");
   const selected = () => items.find(i => i.id === selId) || null;
   const xf = it => `translate(${m(it.x)},${m(it.y)}) rotate(${it.rot})${it.flip ? " scale(-1,1)" : ""}`;
+  const itemInner = it => `<title>${esc(typeName(it.type))} ${fmt(it.L)} × ${fmt(it.W)} ${t("m")}</title>` + shape(it.type, it.L, it.W);
 
   function renderItems() {
     gFurn.replaceChildren();
     items.forEach(it => {
       const g = el("g", { class: "furn", "data-id": it.id, transform: xf(it) }, gFurn);
-      g.innerHTML = `<title>${TYPES[it.type].name} ${fmt(it.L)} × ${fmt(it.W)} m</title>` + shape(it.type, it.L, it.W);
+      g.innerHTML = itemInner(it);
     });
     renderSel();
-    const n = items.length;
-    countEl.textContent = n ? `${n} ${n === 1 ? "piece" : "pieces"} on the plan.` : "Nothing placed yet.";
+    renderCount();
   }
+  const renderCount = () => { const n = items.length; countEl.textContent = n ? t("count", n) : t("countNone"); };
   function updateItem(it) {
     const g = gFurn.querySelector(`[data-id="${it.id}"]`);
     if (!g) return renderItems();
     g.setAttribute("transform", xf(it));
-    g.innerHTML = `<title>${TYPES[it.type].name} ${fmt(it.L)} × ${fmt(it.W)} m</title>` + shape(it.type, it.L, it.W);
+    g.innerHTML = itemInner(it);
     renderSel();
   }
   function renderSel() {
     gSel.replaceChildren();
     const it = selected();
     inspector.hidden = !it;
-    document.getElementById("insp-empty").hidden = !!it;
+    inspEmpty.hidden = !!it;
     if (!it) return;
     const g = el("g", { transform: xf(it) }, gSel);
     const w = it.L * 100, h = it.W * 100;
     el("rect", { x: -w / 2 - 5, y: -h / 2 - 5, width: w + 10, height: h + 10, class: "sel-box" }, g);
     el("rect", { x: w / 2 - 9, y: h / 2 - 9, width: 18, height: 18, class: "sel-handle", "data-handle": "1" }, g);
-    const t = el("text", { x: m(it.x), y: m(it.y) + 7, class: "sel-text", "text-anchor": "middle" }, gSel);
-    t.textContent = `${fmt(it.L)} × ${fmt(it.W)}`;
-    inspName.textContent = TYPES[it.type].name;
+    const tx = el("text", { x: m(it.x), y: m(it.y) + 7, class: "sel-text", "text-anchor": "middle", direction: "ltr" }, gSel);
+    tx.textContent = `${fmt(it.L)} × ${fmt(it.W)}`;
+    inspName.textContent = typeName(it.type);
     if (document.activeElement !== inspL) inspL.value = fmt(it.L);
     if (document.activeElement !== inspW) inspW.value = fmt(it.W);
   }
@@ -821,17 +1608,29 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
 
   // ---- Palette ----
   const palEl = document.getElementById("palette");
-  palEl.innerHTML = Object.entries(TYPES).map(([k, t]) => `
+  palEl.innerHTML = Object.keys(TYPES).map(k => `
     <div class="pi" data-type="${k}">
-      <div class="thumb" tabindex="0" role="button" aria-label="Drag a ${t.name} onto the plan, or press Enter to add one">${thumbSvg(k, ...palette[k])}</div>
+      <div class="thumb" tabindex="0" role="button">${thumbSvg(k, ...palette[k])}</div>
       <div>
-        <div class="pi-name"><span>${t.name}</span><button class="add" data-add="${k}">Add</button></div>
+        <div class="pi-name"><span class="pi-label"></span><button class="add" data-add="${k}"></button></div>
         <div class="dims">
-          <label>L<input type="number" id="pl-${k}-l" min="${MIN}" max="${MAX}" step="0.05" inputmode="decimal" aria-label="${t.name} length in meters"></label>
-          <label>W<input type="number" id="pl-${k}-w" min="${MIN}" max="${MAX}" step="0.05" inputmode="decimal" aria-label="${t.name} width in meters"></label>
+          <label><span class="lab-l"></span><input type="number" id="pl-${k}-l" min="${MIN}" max="${MAX}" step="0.05" inputmode="decimal" dir="ltr"></label>
+          <label><span class="lab-w"></span><input type="number" id="pl-${k}-w" min="${MIN}" max="${MAX}" step="0.05" inputmode="decimal" dir="ltr"></label>
         </div>
       </div>
     </div>`).join("");
+  function renderPaletteText() {
+    palEl.querySelectorAll(".pi").forEach(pi => {
+      const k = pi.dataset.type, n = typeName(k);
+      pi.querySelector(".pi-label").textContent = n;
+      pi.querySelector("[data-add]").textContent = t("add");
+      pi.querySelector(".thumb").setAttribute("aria-label", t("dragAria", n));
+      pi.querySelector(".lab-l").textContent = t("L");
+      pi.querySelector(".lab-w").textContent = t("W");
+      document.getElementById(`pl-${k}-l`).setAttribute("aria-label", t("lenAria", n));
+      document.getElementById(`pl-${k}-w`).setAttribute("aria-label", t("widAria", n));
+    });
+  }
   function renderPalette() {
     Object.keys(TYPES).forEach(k => {
       const li = document.getElementById(`pl-${k}-l`), wi = document.getElementById(`pl-${k}-w`);
@@ -883,7 +1682,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     });
     thumb.addEventListener("pointermove", e => { if (fdrag && fdrag.kind === "new" && e.pointerId === fdrag.pid) moveNew(e); });
     thumb.addEventListener("pointerup", e => { if (fdrag && fdrag.kind === "new" && e.pointerId === fdrag.pid) endNew(false); });
-    thumb.addEventListener("pointercancel", e => { if (fdrag && fdrag.kind === "new") endNew(true); });
+    thumb.addEventListener("pointercancel", () => { if (fdrag && fdrag.kind === "new") endNew(true); });
   });
   function moveNew(e) {
     const d = fdrag;
@@ -921,7 +1720,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     fdrag = { kind: "resize", it, pid: e.pointerId, moved: false };
     try { svg.setPointerCapture(e.pointerId); } catch (_) {}
   });
-  svg.addEventListener("pointerdown", e => { if (!measuring && !fdrag) select(null); });
+  svg.addEventListener("pointerdown", () => { if (!measuring && !fdrag) select(null); });
   svg.addEventListener("pointermove", e => {
     if (!fdrag || fdrag.kind === "new" || e.pointerId !== fdrag.pid) return;
     const p = toPlan(e), st = step(e), it = fdrag.it;
@@ -965,11 +1764,11 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   document.getElementById("act-del").addEventListener("click", () => { const it = selected(); if (it) removeItem(it); });
   const clearBtn = document.getElementById("clear-furn");
   let armTimer = null;
-  const disarm = () => { clearTimeout(armTimer); delete clearBtn.dataset.armed; clearBtn.textContent = "Remove all furniture"; };
+  const disarm = () => { clearTimeout(armTimer); delete clearBtn.dataset.armed; clearBtn.textContent = t("clearAll"); };
   clearBtn.addEventListener("click", () => {
     if (!items.length) return;
     if (clearBtn.dataset.armed) { items = []; selId = null; renderItems(); save(); disarm(); }
-    else { clearBtn.dataset.armed = "1"; clearBtn.textContent = `Click again to remove all ${items.length}`; armTimer = setTimeout(disarm, 3500); }
+    else { clearBtn.dataset.armed = "1"; clearBtn.textContent = t("clearArmed", items.length); armTimer = setTimeout(disarm, 3500); }
   });
 
   function furnKey(e) {
@@ -990,7 +1789,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
 
   // ---- Saving: the page's shared database, or this browser as a fallback ----
   const saveEl = document.getElementById("save-status");
-  const setSave = t => { saveEl.textContent = t; };
+  let saveKey = "loading";
+  const setSave = k => { saveKey = k; saveEl.textContent = t("save_" + k); };
   const LS_KEY = "apartment-plan-furniture-" + D.variant;
   let store = { mode: "pending", ref: null }, saveTimer = null, saving = false, again = false, readOnly = false;
   const stateNow = () => JSON.parse(JSON.stringify({ v: 1, palette, items }));
@@ -1015,7 +1815,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     dirty = true;
     if (readOnly) return;
     clearTimeout(saveTimer);
-    setSave("Saving…");
+    setSave("saving");
     saveTimer = setTimeout(() => { saveTimer = null; flush(); }, 600);
   }
   async function flush() {
@@ -1024,20 +1824,57 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     const data = stateNow();
     if (store.mode === "db") {
       saving = true;
-      try { await store.ref.set(data); dirty = false; setSave("Saved"); }
+      try { await store.ref.set(data); dirty = false; setSave("saved"); }
       catch (e) {
-        if (e && e.code === "invalid_argument") { readOnly = true; setSave("View only. Changes aren't saved"); }
-        else if (e && e.code === "quota_exceeded") setSave("Storage is full. Not saved");
-        else setSave("Couldn't save. Will retry on the next change");
+        if (e && e.code === "invalid_argument") { readOnly = true; setSave("readonly"); }
+        else if (e && e.code === "quota_exceeded") setSave("full");
+        else setSave("retry");
       }
       saving = false;
       if (again) { again = false; flush(); }
     } else {
-      setSave(writeLocal(data) ? "Saved in this browser" : "Can't save in this browser");
+      setSave(writeLocal(data) ? "local" : "localFail");
       dirty = false;
     }
   }
-  renderPalette(); renderItems();
+
+  // ---- Language and theme switchers ----
+  function applyLang() {
+    const d = document.documentElement;
+    d.lang = lang; d.dir = isAr() ? "rtl" : "ltr";
+    document.title = t("docTitle");
+    document.querySelectorAll("[data-i18n]").forEach(n => { n.textContent = t(n.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-aria]").forEach(n => n.setAttribute("aria-label", t(n.dataset.i18nAria)));
+    setPressed(document.getElementById("lang-en"), !isAr());
+    setPressed(document.getElementById("lang-ar"), isAr());
+    renderStats(); renderTable(); renderMethod(); renderLabels(); renderHint(); paint(); redraw();
+    renderPaletteText(); renderItems();
+    if (!clearBtn.dataset.armed) clearBtn.textContent = t("clearAll");
+    saveEl.textContent = t("save_" + saveKey);
+  }
+  function setLang(l) {
+    if (l !== "en" && l !== "ar") return;
+    lang = l; lsSet(LS_LANG, l);
+    try { history.replaceState(null, "", "#" + l); } catch (_) {}
+    applyLang();
+  }
+  document.getElementById("lang-en").addEventListener("click", () => setLang("en"));
+  document.getElementById("lang-ar").addEventListener("click", () => setLang("ar"));
+  addEventListener("hashchange", () => { const h = location.hash.slice(1); if ((h === "en" || h === "ar") && h !== lang) setLang(h); });
+
+  const paintLook = () => {
+    const black = document.documentElement.getAttribute("data-look") === "black";
+    setPressed(document.getElementById("look-white"), !black);
+    setPressed(document.getElementById("look-black"), black);
+  };
+  const setLook = v => { document.documentElement.setAttribute("data-look", v); lsSet(LS_LOOK, v); paintLook(); };
+  document.getElementById("look-white").addEventListener("click", () => setLook("white"));
+  document.getElementById("look-black").addEventListener("click", () => setLook("black"));
+
+  // ---- Start ----
+  renderPalette();
+  applyLang();
+  paintLook();
   (async () => {
     let db = null;
     try {
@@ -1048,30 +1885,30 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       try {
         const ref = db.doc("layouts/main");
         store = { mode: "db", ref };
-        setSave("Loading…");
+        setSave("loading");
         let first = true;
-        const slow = setTimeout(() => setSave("Can't reach the saved layout yet"), 10000);
+        const slow = setTimeout(() => setSave("slow"), 10000);
         ref.onSnapshot(snap => {
           if (snap.metadata.fromCache && first) { if (snap.exists && !dirty) applyState(snap.data()); return; }
           clearTimeout(slow);
           if (first) {
             first = false;
             if (dirty) flush();
-            else { if (snap.exists) applyState(snap.data()); setSave(snap.exists ? "Saved" : "Nothing saved yet"); }
+            else { if (snap.exists) applyState(snap.data()); setSave(snap.exists ? "saved" : "none"); }
             return;
           }
           // Live changes from another tab or person, when nothing local is pending
           if (snap.metadata.hasPendingWrites || fdrag || saveTimer || saving || dirty || !snap.exists) return;
           const incoming = snap.data();
           if (JSON.stringify(incoming) !== JSON.stringify(stateNow())) applyState(incoming);
-        }, err => { clearTimeout(slow); setSave(err && err.code === "revoked" ? "Saving is off for this view" : "Can't reach the saved layout"); });
+        }, err => { clearTimeout(slow); setSave(err && err.code === "revoked" ? "off" : "unreach"); });
         return;
       } catch (_) { /* fall through to this browser */ }
     }
     store = { mode: "local", ref: null };
     const local = readLocal();
     if (!dirty && local) applyState(local);
-    if (dirty) flush(); else setSave(local ? "Saved in this browser" : "Saves in this browser");
+    if (dirty) flush(); else setSave(local ? "local" : "localEmpty");
   })();
 })();
 </script>
