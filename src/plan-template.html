@@ -1188,6 +1188,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       planTitle: "Floor plan", planAria: "Floor plan of the apartment drawn to scale in meters",
       figLabel: "Fig 1 · Plan", figScale: "1 square = 1 m", grid: "Grid", measure: "Measure", clear: "Clear",
       hintHover: "Hover a room for its size.", hintMeasure: "Click two points. Snaps to 5 cm.",
+      hintBlocked: "A wall is in the way. Keep pushing to go through it.",
       m: "m", m2: "m²",
       bedrooms: "bedrooms", baths: "bathrooms + guest WC", sIndoor: "m² indoor", sTerr: "m² terraces", sTotal: "m² total",
       furniture: "Furniture", furnIntro: "Set a size in meters, then drag the piece onto the plan. Change the size and drag again for another copy.",
@@ -1227,6 +1228,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       planTitle: "المسقط", planAria: "مسقط الشقة مرسوم بمقياس رسم بالمتر",
       figLabel: "شكل 1 · المسقط", figScale: "المربع = 1 م", grid: "الشبكة", measure: "قياس", clear: "مسح",
       hintHover: "مرّر المؤشر على غرفة لمعرفة مقاسها.", hintMeasure: "اضغط على نقطتين. القياس كل 5 سم.",
+      hintBlocked: "يوجد حائط. استمر في الدفع للعبور منه.",
       m: "م", m2: "م²",
       bedrooms: "غرف نوم", baths: "حمام + دورة مياه للضيوف", sIndoor: "م² داخلي", sTerr: "م² تراسات", sTotal: "م² إجمالي",
       furniture: "الأثاث", furnIntro: "حدّد المقاس بالمتر، ثم اسحب القطعة إلى المسقط. غيّر المقاس واسحب مرة أخرى لإضافة نسخة جديدة.",
@@ -1681,6 +1683,60 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   const crossesWall = ([x0, y0, x1, y1]) => WALLS.some(([a, b, c, d]) => near(a, c)
     ? a > x0 + 1e-3 && a < x1 - 1e-3 && Math.max(b, d) > y0 + 1e-3 && Math.min(b, d) < y1 - 1e-3
     : b > y0 + 1e-3 && b < y1 - 1e-3 && Math.max(a, c) > x0 + 1e-3 && Math.min(a, c) < x1 - 1e-3);
+  // ---- Walls block movement ----
+  // A piece moving toward a wall stops on the wall line and slides along it.
+  // Pushing PASS meters past the wall lets it through to the other side.
+  const PASS = 0.35;
+  function sweep(box, dx, dy) {
+    const [x0, y0, x1, y1] = box, v = dx || dy;
+    if (!v) return 0;
+    let allowed = v;
+    for (const [a, b, c, d] of WALLS) {
+      if (dx) {
+        if (!near(a, c) || Math.max(b, d) <= y0 + 1e-3 || Math.min(b, d) >= y1 - 1e-3) continue;
+        const gap = v > 0 ? a - x1 : a - x0;
+        if (v > 0 && gap >= -1e-6 && gap < allowed) allowed = Math.max(0, gap);
+        if (v < 0 && gap <= 1e-6 && gap > allowed) allowed = Math.min(0, gap);
+      } else {
+        if (!near(b, d) || Math.max(a, c) <= x0 + 1e-3 || Math.min(a, c) >= x1 - 1e-3) continue;
+        const gap = v > 0 ? b - y1 : b - y0;
+        if (v > 0 && gap >= -1e-6 && gap < allowed) allowed = Math.max(0, gap);
+        if (v < 0 && gap <= 1e-6 && gap > allowed) allowed = Math.min(0, gap);
+      }
+    }
+    return allowed;
+  }
+  // Move a piece toward (tx, ty), one axis at a time so it slides along walls.
+  // Returns true while a wall is holding it back.
+  function moveBlocked(it, tx, ty) {
+    let blocked = false;
+    const wantX = tx - it.x;
+    let ax = sweep(aabb(it), wantX, 0);
+    if (Math.abs(wantX - ax) > PASS) ax = wantX; else if (Math.abs(wantX - ax) > 1e-6) blocked = true;
+    it.x = r2(it.x + ax);
+    const wantY = ty - it.y;
+    let ay = sweep(aabb(it), 0, wantY);
+    if (Math.abs(wantY - ay) > PASS) ay = wantY; else if (Math.abs(wantY - ay) > 1e-6) blocked = true;
+    it.y = r2(it.y + ay);
+    return blocked;
+  }
+  let nudgePush = { key: null, acc: 0 }, blockTimer = null;
+  function nudge(it, dx, dy) {
+    const want = dx || dy, key = (dx ? "x" : "y") + Math.sign(want);
+    const allowed = sweep(aabb(it), dx, dy);
+    let v = allowed;
+    if (Math.abs(want - allowed) > 1e-6) {
+      if (nudgePush.key !== key) nudgePush = { key, acc: 0 };
+      nudgePush.acc += Math.abs(want - allowed);
+      if (nudgePush.acc > PASS) { v = want; nudgePush = { key: null, acc: 0 }; }
+      showBlocked(true);
+      clearTimeout(blockTimer); blockTimer = setTimeout(() => showBlocked(false), 1200);
+    } else nudgePush = { key: null, acc: 0 };
+    if (dx) it.x = r2(it.x + v); else it.y = r2(it.y + v);
+    updateItem(it); save();
+  }
+  function showBlocked(on) { if (on) hint.textContent = t("hintBlocked"); else renderHint(); }
+
   function aabb(it) {
     const a = it.rot * Math.PI / 180, c = Math.abs(Math.cos(a)), s = Math.abs(Math.sin(a));
     const hx = (c * it.L + s * it.W) / 2, hy = (s * it.L + c * it.W) / 2;
@@ -1864,7 +1920,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       if (e && !cancel) moveNew(e);
       endNew(cancel);
     } else {
-      const moved = fdrag.moved; fdrag = null;
+      const moved = fdrag.moved, wasBlocked = fdrag.blocked; fdrag = null;
+      if (wasBlocked) showBlocked(false);
       if (moved) save();
     }
   }
@@ -1931,7 +1988,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   function dragOnPlan(e) {
     const p = toPlan(e), st = step(e), it = fdrag.it;
     if (fdrag.kind === "move") {
-      it.x = snapTo(p.x + fdrag.dx, st); it.y = snapTo(p.y + fdrag.dy, st);
+      const blocked = moveBlocked(it, snapTo(p.x + fdrag.dx, st), snapTo(p.y + fdrag.dy, st));
+      if (blocked !== !!fdrag.blocked) { fdrag.blocked = blocked; showBlocked(blocked); }
     } else {
       // Resize from the corner handle; the opposite corner stays put
       const a = it.rot * Math.PI / 180, c = Math.cos(a), s = Math.sin(a), f = it.flip ? -1 : 1;
@@ -1978,10 +2036,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     else if (k === "d" || k === "D") duplicate(it);
     else if (k === "Delete" || k === "Backspace") removeItem(it);
     else if (k === "Escape") select(null);
-    else if (k === "ArrowLeft") { it.x = r2(it.x - st); updateItem(it); save(); }
-    else if (k === "ArrowRight") { it.x = r2(it.x + st); updateItem(it); save(); }
-    else if (k === "ArrowUp") { it.y = r2(it.y - st); updateItem(it); save(); }
-    else if (k === "ArrowDown") { it.y = r2(it.y + st); updateItem(it); save(); }
+    else if (k === "ArrowLeft") nudge(it, -st, 0);
+    else if (k === "ArrowRight") nudge(it, st, 0);
+    else if (k === "ArrowUp") nudge(it, 0, -st);
+    else if (k === "ArrowDown") nudge(it, 0, st);
     else return false;
     return true;
   }
