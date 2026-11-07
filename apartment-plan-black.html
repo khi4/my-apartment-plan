@@ -133,6 +133,15 @@ kbd { font-family: var(--f-mono); font-size: 10.5px; border: 1px solid var(--lin
 .thumb:active { cursor: grabbing; }
 .thumb svg, .chip svg { width: 70px; height: 50px; display: block; overflow: visible; }
 .thumb svg *, .chip svg * { vector-effect: non-scaling-stroke; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.tab { font: 500 12px var(--f-body); color: var(--mid); background: none; border: 1px solid var(--line); padding: 4px 9px; cursor: pointer; }
+.tab:hover { color: var(--ink); border-color: var(--mid); }
+.tab[aria-selected="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.tab:focus-visible, .search:focus-visible { outline: 1.5px solid var(--ink); outline-offset: 2px; }
+.search { width: 100%; box-sizing: border-box; font: 13px var(--f-body); color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 0; padding: 6px 9px; margin-bottom: 12px; }
+.pal-h { grid-column: 1 / -1; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--mid); padding-top: 4px; border-top: 1px solid var(--faint); }
+.pal-h:first-child { border-top: 0; padding-top: 0; }
+html[lang="ar"] .pal-h { font-family: var(--f-ar); font-size: 12px; letter-spacing: 0; text-transform: none; }
 .pi-name { font-weight: 500; font-size: 13.5px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .add { background: none; border: 0; padding: 0; font: 12px var(--f-body); color: var(--mid); text-decoration: underline; text-decoration-color: var(--lo); text-underline-offset: 3px; cursor: pointer; }
 .add:hover { color: var(--ink); }
@@ -155,6 +164,7 @@ kbd { font-family: var(--f-mono); font-size: 10.5px; border: 1px solid var(--lin
 .f-s { fill: var(--raise); stroke: var(--ink); stroke-width: 1.5; }
 .f-l { fill: none; stroke: var(--mid); stroke-width: 1.3; }
 .f-front { stroke: var(--ink); stroke-width: 4; }
+.f-rug { fill: var(--raise); fill-opacity: 0.6; stroke: var(--mid); stroke-width: 1.5; }
 .ghost { opacity: 0.65; pointer-events: none; }
 .sel-box { fill: none; stroke: var(--lit); stroke-width: 2; stroke-dasharray: 7 5; pointer-events: none; }
 .sel-handle { fill: var(--paper); stroke: var(--lit); stroke-width: 2.5; cursor: nwse-resize; touch-action: none; }
@@ -214,7 +224,23 @@ tfoot tr:last-child td { font-weight: 500; border-top: 1px solid var(--line); }
 details { margin-top: 12px; }
 summary { cursor: pointer; font-size: 13px; color: var(--mid); }
 pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-height: 420px; overflow: auto; border: 1px solid var(--faint); padding: 12px; margin: 10px 0 0; color: var(--ink); background: var(--paper); }
+
+/* 3D view: same card, same colours; labels are HTML laid over the canvas */
+.view3d { position: relative; direction: ltr; aspect-ratio: 1525 / 1245; min-height: 340px; overflow: hidden; background: var(--paper); touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.view3d.dragging { cursor: grabbing; }
+.view3d canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
+.v3-labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; --k: 1; }
+.l3 { position: absolute; left: 0; top: 0; display: grid; justify-items: center; gap: 1px; white-space: nowrap; text-align: center; line-height: 1.15; text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper), 0 0 2px var(--paper); }
+.l3 b { font-family: var(--f-display); font-weight: 600; font-size: calc(15px * var(--k)); color: var(--ink); letter-spacing: 0.02em; }
+.l3 span { font-family: var(--f-mono); font-size: calc(11px * var(--k)); color: var(--mid); font-variant-numeric: tabular-nums; }
+.l3.sm b { font-size: calc(12.5px * var(--k)); }
+.l3.note span { font-family: var(--f-body); font-size: calc(11.5px * var(--k)); }
+.l3.tag b { font-size: calc(13px * var(--k)); letter-spacing: 0.14em; }
+html[lang="ar"] .l3 b { font-family: var(--f-ar); letter-spacing: 0; }
+html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
+.v3-msg { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; padding: 16px; text-align: center; font-size: 13px; color: var(--mid); }
 </style>
+<script type="importmap">{"imports": {"three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <script>(function(){var d=document.documentElement,v=null,l=null;try{v=localStorage.getItem("apartment-plan-look-black");l=localStorage.getItem("apartment-plan-lang")}catch(e){}d.setAttribute("data-look",v==="white"||v==="black"?v:"black");var h=location.hash;if(h==="#ar"||h==="#en")l=h.slice(1);if(l==="ar"){d.lang="ar";d.dir="rtl"}else{d.lang="en";d.dir="ltr"}})();</script>
 
 <script type="application/json" id="plan-data">
@@ -1048,7 +1074,257 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       ]
     ]
   ],
-  "wallModel": "Walls are zero-thickness lines on the rooms' inside faces. Every room rectangle is exactly its clear inside size, and neighbouring rooms share one wall line."
+  "wallModel": "Walls are zero-thickness lines on the rooms' inside faces. Every room rectangle is exactly its clear inside size, and neighbouring rooms share one wall line.",
+  "furnitureCategories": [
+    {
+      "id": "bedroom",
+      "en": "Bedroom",
+      "ar": "غرفة النوم"
+    },
+    {
+      "id": "living",
+      "en": "Living",
+      "ar": "المعيشة"
+    },
+    {
+      "id": "dining",
+      "en": "Dining",
+      "ar": "السفرة"
+    },
+    {
+      "id": "kitchen",
+      "en": "Kitchen & bath",
+      "ar": "المطبخ والحمام"
+    },
+    {
+      "id": "other",
+      "en": "Other",
+      "ar": "أخرى"
+    }
+  ],
+  "furniture": [
+    {
+      "type": "bed",
+      "category": "bedroom",
+      "en": "Double bed",
+      "ar": "سرير مزدوج",
+      "length": 2.0,
+      "width": 1.6
+    },
+    {
+      "type": "sbed",
+      "category": "bedroom",
+      "en": "Single bed",
+      "ar": "سرير فردي",
+      "length": 1.9,
+      "width": 0.9
+    },
+    {
+      "type": "nightstand",
+      "category": "bedroom",
+      "en": "Nightstand",
+      "ar": "كومودينو",
+      "length": 0.45,
+      "width": 0.4
+    },
+    {
+      "type": "wardrobe",
+      "category": "bedroom",
+      "en": "Wardrobe",
+      "ar": "دولاب",
+      "length": 1.8,
+      "width": 0.6
+    },
+    {
+      "type": "dresser",
+      "category": "bedroom",
+      "en": "Dresser",
+      "ar": "شيفونيرة",
+      "length": 1.2,
+      "width": 0.5
+    },
+    {
+      "type": "vanity",
+      "category": "bedroom",
+      "en": "Vanity",
+      "ar": "تسريحة",
+      "length": 1.0,
+      "width": 0.45
+    },
+    {
+      "type": "sofa",
+      "category": "living",
+      "en": "Sofa",
+      "ar": "كنبة",
+      "length": 2.1,
+      "width": 0.9
+    },
+    {
+      "type": "lsofa",
+      "category": "living",
+      "en": "L-Sofa",
+      "ar": "كنبة زاوية",
+      "length": 2.8,
+      "width": 2.0
+    },
+    {
+      "type": "armchair",
+      "category": "living",
+      "en": "Armchair",
+      "ar": "فوتيه",
+      "length": 0.85,
+      "width": 0.85
+    },
+    {
+      "type": "coffee",
+      "category": "living",
+      "en": "Coffee table",
+      "ar": "ترابيزة وسط",
+      "length": 1.1,
+      "width": 0.6
+    },
+    {
+      "type": "tv",
+      "category": "living",
+      "en": "TV unit",
+      "ar": "وحدة تلفزيون",
+      "length": 1.8,
+      "width": 0.4
+    },
+    {
+      "type": "rug",
+      "category": "living",
+      "en": "Rug",
+      "ar": "سجادة",
+      "length": 3.0,
+      "width": 2.0,
+      "under": true,
+      "note": "Sits under other furniture; never counts as an overlap."
+    },
+    {
+      "type": "bookcase",
+      "category": "living",
+      "en": "Bookcase",
+      "ar": "مكتبة",
+      "length": 0.8,
+      "width": 0.35
+    },
+    {
+      "type": "dining",
+      "category": "dining",
+      "en": "Dining table + chairs",
+      "ar": "سفرة بالكراسي",
+      "length": 1.6,
+      "width": 1.6,
+      "note": "Size is the whole set including chairs; the table itself is about 0.90 m deep."
+    },
+    {
+      "type": "rtable",
+      "category": "dining",
+      "en": "Round table",
+      "ar": "ترابيزة مستديرة",
+      "length": 1.1,
+      "width": 1.1
+    },
+    {
+      "type": "chair",
+      "category": "dining",
+      "en": "Chair",
+      "ar": "كرسي",
+      "length": 0.5,
+      "width": 0.5
+    },
+    {
+      "type": "sideboard",
+      "category": "dining",
+      "en": "Sideboard",
+      "ar": "بوفيه",
+      "length": 1.6,
+      "width": 0.45
+    },
+    {
+      "type": "counter",
+      "category": "kitchen",
+      "en": "Kitchen counter",
+      "ar": "رخامة المطبخ",
+      "length": 2.4,
+      "width": 0.6,
+      "note": "Drawn with a sink and, from 1.50 m long, a four-ring hob."
+    },
+    {
+      "type": "fridge",
+      "category": "kitchen",
+      "en": "Fridge",
+      "ar": "ثلاجة",
+      "length": 0.7,
+      "width": 0.7
+    },
+    {
+      "type": "washer",
+      "category": "kitchen",
+      "en": "Washing machine",
+      "ar": "غسالة",
+      "length": 0.6,
+      "width": 0.6
+    },
+    {
+      "type": "shower",
+      "category": "kitchen",
+      "en": "Shower",
+      "ar": "كابينة دش",
+      "length": 0.9,
+      "width": 0.9
+    },
+    {
+      "type": "bathtub",
+      "category": "kitchen",
+      "en": "Bathtub",
+      "ar": "بانيو",
+      "length": 1.7,
+      "width": 0.75
+    },
+    {
+      "type": "toilet",
+      "category": "kitchen",
+      "en": "Toilet",
+      "ar": "مرحاض",
+      "length": 0.4,
+      "width": 0.7
+    },
+    {
+      "type": "basin",
+      "category": "kitchen",
+      "en": "Washbasin",
+      "ar": "حوض",
+      "length": 0.6,
+      "width": 0.45
+    },
+    {
+      "type": "desk",
+      "category": "other",
+      "en": "Desk",
+      "ar": "مكتب",
+      "length": 1.2,
+      "width": 0.6
+    },
+    {
+      "type": "table",
+      "category": "other",
+      "en": "Table",
+      "ar": "طاولة",
+      "length": 1.6,
+      "width": 0.9
+    },
+    {
+      "type": "plant",
+      "category": "other",
+      "en": "Plant",
+      "ar": "نبات",
+      "length": 0.4,
+      "width": 0.4
+    }
+  ],
+  "furnitureFormat": "Each placed piece: x, y = its center in plan coordinates (m); L = length along its own x, W = width along its own y (m); rot = degrees clockwise; flip mirrors it. Sizes can be changed from 0.30 to 8.00 m."
 }
 </script>
 
@@ -1060,6 +1336,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       <div class="stats" id="stats"></div>
     </div>
     <div class="switches">
+      <div class="seg" role="group" data-i18n-aria="viewGroup" aria-label="View">
+        <button id="view-2d" dir="ltr" aria-pressed="true">2D</button>
+        <button id="view-3d" dir="ltr" aria-pressed="false">3D</button>
+      </div>
       <div class="seg" role="group" data-i18n-aria="langGroup" aria-label="Language">
         <button id="lang-en" lang="en" dir="ltr" aria-pressed="true">English</button>
         <button id="lang-ar" lang="ar" dir="rtl" aria-pressed="false">العربية</button>
@@ -1073,15 +1353,23 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
 
   <div class="studio">
   <figure class="card" style="margin:0" data-i18n-aria="planTitle" aria-label="Floor plan">
-    <div class="card-top cap"><span data-i18n="figLabel">Fig 1 · Plan</span><span data-i18n="figScale">1 square = 1 m</span></div>
+    <div class="card-top cap"><span id="fig-label" data-i18n="figLabel">Fig 1 · Plan</span><span data-i18n="figScale">1 square = 1 m</span></div>
     <div class="plan-scroll">
       <svg id="plan" viewBox="-115 -100 1525 1245" role="img" data-i18n-aria="planAria" aria-label="Floor plan of the apartment drawn to scale in meters"></svg>
+    </div>
+    <div class="view3d" id="view3d" hidden role="application" data-i18n-aria="view3dAria" aria-label="3D view of the apartment. Drag to turn, scroll to zoom.">
+      <div class="v3-labels" id="v3-labels"></div>
+      <p class="v3-msg" id="v3-msg" hidden></p>
     </div>
     <div class="card-bot">
       <div class="ctl">
         <button id="btn-grid" aria-pressed="true"><span data-i18n="grid">Grid</span><kbd>G</kbd></button>
         <button id="btn-measure" aria-pressed="false"><span data-i18n="measure">Measure</span><kbd>M</kbd></button>
         <button id="btn-clear"><span data-i18n="clear">Clear</span><kbd>C</kbd></button>
+        <button id="btn-zin" hidden><span data-i18n="zoomIn">Zoom in</span><kbd>+</kbd></button>
+        <button id="btn-zout" hidden><span data-i18n="zoomOut">Zoom out</span><kbd>−</kbd></button>
+        <button id="btn-top" hidden><span data-i18n="topView">Top view</span><kbd>T</kbd></button>
+        <button id="btn-reset" hidden><span data-i18n="resetView">Reset view</span><kbd>0</kbd></button>
         <span id="hint">Hover a room for its size.</span>
       </div>
       <span class="readout" id="readout">x – · y –</span>
@@ -1121,7 +1409,12 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
         <p class="small" data-i18n="inspHint">Drag to move. Drag the corner square to resize. Keys: R rotate, F flip, D duplicate, Delete remove, arrows nudge 5 cm. Hold Shift for 1 cm steps.</p>
       </div>
     </div>
-    <div class="panel-sec"><div class="pal" id="palette"></div></div>
+    <div class="panel-sec">
+      <div class="tabs" id="cat-tabs" role="tablist"></div>
+      <input class="search" id="furn-search" type="search" autocomplete="off">
+      <div class="pal" id="palette"></div>
+      <p class="small" id="pal-empty" hidden></p>
+    </div>
     <div class="panel-sec">
       <button class="act" id="clear-furn">Remove all furniture</button>
       <p class="small" id="furn-count">Nothing placed yet.</p>
@@ -1217,10 +1510,15 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       hMeans: "What every size means", hSteps: "Steps", hCoords: "Coordinates", hAssume: "Assumptions", hData: "Plan data",
       dataNote: "Every number on this page comes from one data block stored in the page itself.",
       copy: "Copy plan data (JSON)", copied: "Copied", copySel: "Selected below. Press Cmd/Ctrl+C", showData: "Show plan data",
+      catAll: "All", tabsAria: "Furniture categories", searchPh: "Search furniture", searchAria: "Search furniture by name", noMatch: q => `No furniture matches "${q}".`,
       lightwell: "Light well (not part of the apartment)", lift1: "Lift /", lift2: "shaft", entrance: "ENTRANCE",
       gapsTitle: "Space around", gapsNote: "Clear distance from each side to the nearest wall or piece. The smallest gap along the side is shown.",
       dir_left: "Left", dir_right: "Right", dir_up: "Above", dir_down: "Below",
       overlapWall: "Overlaps a wall", overlapItem: "Overlaps another piece",
+      viewGroup: "View", figLabel3d: "Fig 1 · 3D view", view3dAria: "3D view of the apartment. Drag to turn, scroll to zoom.",
+      hint3d: "Drag to turn · scroll or pinch to zoom · right-drag to move. Click a piece to select it.",
+      zoomIn: "Zoom in", zoomOut: "Zoom out", topView: "Top view", resetView: "Reset view",
+      v3Loading: "Loading the 3D view…", v3Fail: "Couldn't load the 3D view. Check your connection, then choose 3D again.",
     },
     ar: {
       docTitle: "مسقط شقة 3 غرف نوم", eyebrow: "مسقط أفقي · بمقياس رسم · بالمتر", title: "مسقط شقة 3 غرف نوم",
@@ -1257,10 +1555,15 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       hMeans: "معنى كل مقاس", hSteps: "الخطوات", hCoords: "الإحداثيات", hAssume: "الافتراضات", hData: "بيانات المسقط",
       dataNote: "كل رقم في هذه الصفحة مأخوذ من كتلة بيانات واحدة محفوظة داخل الصفحة نفسها.",
       copy: "نسخ بيانات المسقط (JSON)", copied: "تم النسخ", copySel: "تم التحديد بالأسفل، اضغط Cmd/Ctrl+C", showData: "عرض بيانات المسقط",
+      catAll: "الكل", tabsAria: "فئات الأثاث", searchPh: "ابحث في الأثاث", searchAria: "ابحث عن قطعة أثاث بالاسم", noMatch: q => `لا يوجد أثاث يطابق "${q}".`,
       lightwell: "منور (ليس جزءًا من الشقة)", lift1: "مصعد /", lift2: "بئر", entrance: "المدخل",
       gapsTitle: "المسافة حولها", gapsNote: "المسافة الصافية من كل جانب إلى أقرب حائط أو قطعة. يظهر أصغر فراغ على طول الجانب.",
       dir_left: "يسار", dir_right: "يمين", dir_up: "أعلى", dir_down: "أسفل",
       overlapWall: "تتداخل مع حائط", overlapItem: "تتداخل مع قطعة أخرى",
+      viewGroup: "العرض", figLabel3d: "شكل 1 · عرض ثلاثي الأبعاد", view3dAria: "عرض ثلاثي الأبعاد للشقة. اسحب للتدوير، ومرّر للتكبير.",
+      hint3d: "اسحب للتدوير · مرّر أو قرّب بإصبعين للتكبير · اسحب بالزر الأيمن للتحريك. اضغط على قطعة لتحديدها.",
+      zoomIn: "تكبير", zoomOut: "تصغير", topView: "من أعلى", resetView: "إعادة الضبط",
+      v3Loading: "جارٍ تحميل العرض ثلاثي الأبعاد…", v3Fail: "تعذّر تحميل العرض ثلاثي الأبعاد. تحقّق من الاتصال ثم اختر 3D مرة أخرى.",
     },
   };
   const lsGet = k => { try { return localStorage.getItem(k); } catch (_) { return null; } };
@@ -1271,7 +1574,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   const isAr = () => lang === "ar";
   const nameOf = r => isAr() ? (r.arName || r.ar) : r.en;
   const altOf = r => isAr() ? r.en : r.ar;
-  const typeName = k => t("type_" + k);
+  const FURN = Object.fromEntries(D.furniture.map(f => [f.type, f]));
+  const CATS = D.furnitureCategories;
+  const typeName = k => FURN[k] ? (isAr() ? FURN[k].ar : FURN[k].en) : k;
+  const catName = id => { const c = CATS.find(x => x.id === id); return c ? (isAr() ? c.ar : c.en) : t("catAll"); };
   const sizeText = r => r.across != null ? `${fmt(r.across)} × ${fmt(r.deep)}` : t("lobbyGiven");
   const dimText = r => r.across != null ? `${sizeText(r)} ${t("m")}` : sizeText(r);
 
@@ -1470,6 +1776,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     hotId = id;
     document.querySelectorAll("[data-room]").forEach(n => n.classList.toggle("hot", n.dataset.room === id));
     paint();
+    if (V) V.paintHot();
   }
   gFloor.querySelectorAll("[data-room]").forEach(n => {
     n.addEventListener("pointerenter", () => setHot(n.dataset.room));
@@ -1483,13 +1790,13 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   // ---- Controls ----
   const btnGrid = document.getElementById("btn-grid"), btnMeasure = document.getElementById("btn-measure");
   const setPressed = (btn, on) => btn.setAttribute("aria-pressed", String(on));
-  const toggleGrid = () => { const on = btnGrid.getAttribute("aria-pressed") !== "true"; setPressed(btnGrid, on); gGrid.toggleAttribute("hidden", !on); };
+  const toggleGrid = () => { const on = btnGrid.getAttribute("aria-pressed") !== "true"; setPressed(btnGrid, on); gGrid.toggleAttribute("hidden", !on); if (V) V.setGrid(on); };
   btnGrid.addEventListener("click", toggleGrid);
 
   let measuring = false, pending = null, cursor = null;
   const done = [];
   const hint = document.getElementById("hint");
-  const renderHint = () => { hint.textContent = measuring ? t("hintMeasure") : t("hintHover"); };
+  const renderHint = () => { hint.textContent = mode === "3d" ? t("hint3d") : measuring ? t("hintMeasure") : t("hintHover"); };
   const toPlan = e => {
     const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
     const r = pt.matrixTransform(svg.getScreenCTM().inverse());
@@ -1535,6 +1842,17 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     if (e.metaKey || e.ctrlKey || e.altKey || /input|textarea|select/i.test(e.target.tagName)) return;
     if (furnKey(e)) { e.preventDefault(); return; }
     const k = e.key.toLowerCase();
+    if (mode === "3d") {
+      if (k === "g") toggleGrid();
+      else if (!V) return;
+      else if (k === "+" || k === "=") V.zoom(0.8);
+      else if (k === "-" || k === "_") V.zoom(1.25);
+      else if (k === "0") V.reset();
+      else if (k === "t") V.top();
+      else return;
+      e.preventDefault();
+      return;
+    }
     if (k === "g") toggleGrid();
     else if (k === "m") setMeasure(!measuring);
     else if (k === "c") clearAll();
@@ -1545,10 +1863,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   // Furniture: palette with sizes, drag a copy onto the plan, move,
   // resize, rotate, flip, duplicate, remove. Sizes in meters.
   // =====================================================================
-  const TYPES = {
-    bed: { L: 2.00, W: 1.60 }, lsofa: { L: 2.80, W: 2.00 }, sofa: { L: 2.10, W: 0.90 },
-    chair: { L: 0.50, W: 0.50 }, wardrobe: { L: 1.80, W: 0.60 }, table: { L: 1.60, W: 0.90 },
-  };
+  const TYPES = Object.fromEntries(D.furniture.map(f => [f.type, { L: f.length, W: f.width, cat: f.category, under: !!f.under }]));
   const MIN = 0.3, MAX = 8;
   const r2 = v => Math.round(v * 100) / 100;
   const clampSize = v => Math.min(MAX, Math.max(MIN, r2(v)));
@@ -1561,6 +1876,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     const n1 = v => (+v).toFixed(1);
     const R = (x, y, ww, hh, cls, rx = 0) => `<rect x="${n1(x)}" y="${n1(y)}" width="${n1(Math.max(0, ww))}" height="${n1(Math.max(0, hh))}" rx="${rx}" class="${cls}"/>`;
     const Ln = (xa, ya, xb, yb, cls) => `<line x1="${n1(xa)}" y1="${n1(ya)}" x2="${n1(xb)}" y2="${n1(yb)}" class="${cls}"/>`;
+    const E = (cx, cy, rx, ry, cls) => `<ellipse cx="${n1(cx)}" cy="${n1(cy)}" rx="${n1(Math.max(0, rx))}" ry="${n1(Math.max(0, ry))}" class="${cls}"/>`;
+    const front = () => Ln(x0, y0 + h - 2, x0 + w, y0 + h - 2, "f-front");
+    if (type === "sbed") type = "bed";
+    if (type === "armchair") type = "sofa";
     let s = "";
     if (type === "bed") {
       s += R(x0, y0, w, h, "f-b", 3);
@@ -1610,6 +1929,80 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     } else if (type === "table") {
       s += R(x0, y0, w, h, "f-b", 4);
       s += R(x0 + 6, y0 + 6, w - 12, h - 12, "f-l", 2);
+    } else if (type === "nightstand") {
+      s += R(x0, y0, w, h, "f-b", 2) + front();
+      s += Ln(-w * 0.15, y0 + h - 9, w * 0.15, y0 + h - 9, "f-l");
+    } else if (type === "dresser" || type === "sideboard") {
+      s += R(x0, y0, w, h, "f-b", 2) + front();
+      const n = Math.max(1, Math.round(w / (type === "dresser" ? 45 : 50)));
+      for (let i = 1; i < n; i++) s += Ln(x0 + i * w / n, y0 + h * 0.35, x0 + i * w / n, y0 + h, "f-l");
+      for (let i = 0; i < n; i++) { const cx = x0 + (i + 0.5) * w / n; s += Ln(cx - 6, y0 + h - 9, cx + 6, y0 + h - 9, "f-l"); }
+    } else if (type === "vanity") {
+      s += R(x0, y0, w, h, "f-b", 3) + front();
+      s += E(0, y0 + 7, w * 0.32, 4, "f-s");
+    } else if (type === "coffee") {
+      s += R(x0, y0, w, h, "f-b", 8);
+      s += R(x0 + 7, y0 + 7, w - 14, h - 14, "f-l", 5);
+    } else if (type === "tv") {
+      s += R(x0, y0, w, h, "f-b", 2) + front();
+      s += R(-w * 0.36, y0 + 4, w * 0.72, Math.min(6, h * 0.2), "f-s", 1);
+    } else if (type === "rug") {
+      s += R(x0, y0, w, h, "f-rug", 2);
+      s += R(x0 + 10, y0 + 10, w - 20, h - 20, "f-l", 2);
+      for (let y = y0 + 6; y <= y0 + h - 6; y += 8) s += Ln(x0 - 6, y, x0, y, "f-l") + Ln(x0 + w, y, x0 + w + 6, y, "f-l");
+    } else if (type === "bookcase") {
+      s += R(x0, y0, w, h, "f-b", 1) + front();
+      const n = Math.max(1, Math.round(w / 40));
+      for (let i = 1; i < n; i++) s += Ln(x0 + i * w / n, y0, x0 + i * w / n, y0 + h, "f-l");
+    } else if (type === "dining") {
+      const c = Math.min(45, h * 0.28), tuck = Math.min(10, c * 0.25), back = Math.max(5, c * 0.18);
+      const n = Math.max(1, Math.floor(w / 60)), slot = w / n, cw = Math.min(45, slot - 10);
+      for (let i = 0; i < n; i++) {
+        const cx = x0 + (i + 0.5) * slot;
+        s += R(cx - cw / 2, y0, cw, c, "f-b", 5) + R(cx - cw / 2, y0, cw, back, "f-s", 3);
+        s += R(cx - cw / 2, y0 + h - c, cw, c, "f-b", 5) + R(cx - cw / 2, y0 + h - back, cw, back, "f-s", 3);
+      }
+      const td = h - 2 * (c - tuck);
+      s += R(x0, y0 + c - tuck, w, td, "f-b", 3);
+      s += R(x0 + 6, y0 + c - tuck + 6, w - 12, td - 12, "f-l", 2);
+    } else if (type === "rtable") {
+      s += E(0, 0, w / 2, h / 2, "f-b") + E(0, 0, w / 2 - 7, h / 2 - 7, "f-l");
+    } else if (type === "counter") {
+      s += R(x0, y0, w, h, "f-b", 1) + front();
+      const sw = Math.min(60, w * 0.3), sx = x0 + w * 0.25 - sw / 2;
+      s += R(sx, y0 + 8, sw, h - 22, "f-l", 6) + E(sx + sw / 2, y0 + 8 + (h - 22) / 2, 2.5, 2.5, "f-l");
+      if (w >= 150) { const hx = x0 + w * 0.72, r = Math.min(9, h * 0.13); [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => { s += E(hx + a * 15, b * 13 - 4, r, r, "f-l"); }); }
+    } else if (type === "fridge") {
+      s += R(x0, y0, w, h, "f-b", 2) + front();
+      s += Ln(x0 + 6, y0 + 6, x0 + w - 6, y0 + h - 8, "f-l") + Ln(x0 + w - 6, y0 + 6, x0 + 6, y0 + h - 8, "f-l");
+    } else if (type === "washer") {
+      const r = Math.min(w, h) * 0.32;
+      s += R(x0, y0, w, h, "f-b", 3) + front();
+      s += E(0, 2, r, r, "f-l") + E(0, 2, r * 0.6, r * 0.6, "f-l");
+    } else if (type === "shower") {
+      s += R(x0, y0, w, h, "f-b", 2);
+      s += Ln(x0 + 4, y0 + 4, x0 + w - 4, y0 + h - 4, "f-l") + Ln(x0 + w - 4, y0 + 4, x0 + 4, y0 + h - 4, "f-l");
+      s += E(0, 0, 3, 3, "f-s");
+    } else if (type === "bathtub") {
+      s += R(x0, y0, w, h, "f-b", 6);
+      s += R(x0 + 7, y0 + 7, w - 14, h - 14, "f-l", Math.max(0, Math.min(25, (h - 14) / 2)));
+      s += E(x0 + w - 18, 0, 2.5, 2.5, "f-l");
+    } else if (type === "toilet") {
+      const tk = h * 0.24, bh = (h - tk) / 2;
+      s += R(x0 + w * 0.05, y0, w * 0.9, tk, "f-s", 2);
+      s += E(0, y0 + tk + bh, w * 0.42, bh - 1, "f-b");
+      s += E(0, y0 + tk + bh + 2, w * 0.28, bh - 10, "f-l");
+    } else if (type === "basin") {
+      s += R(x0, y0, w, h, "f-b", 3);
+      s += E(0, 3, w * 0.34, h * 0.3, "f-l") + E(0, y0 + 6, 2, 2, "f-s");
+    } else if (type === "desk") {
+      s += R(x0, y0, w, h, "f-b", 2);
+      s += Ln(x0 + w * 0.68, y0, x0 + w * 0.68, y0 + h, "f-l");
+      for (let i = 1; i < 3; i++) s += Ln(x0 + w * 0.68, y0 + h * i / 3, x0 + w, y0 + h * i / 3, "f-l");
+    } else if (type === "plant") {
+      s += E(0, 0, w / 2, h / 2, "f-b");
+      for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + 0.3; s += Ln(0, 0, Math.cos(a) * w * 0.4, Math.sin(a) * h * 0.4, "f-l"); }
+      s += E(0, 0, w * 0.12, h * 0.12, "f-s");
     }
     return s;
   }
@@ -1635,7 +2028,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
 
   function renderItems() {
     gFurn.replaceChildren();
-    items.forEach(it => {
+    // Rugs first, so everything else sits on top of them
+    [...items].sort((a, b) => (TYPES[b.type].under ? 1 : 0) - (TYPES[a.type].under ? 1 : 0)).forEach(it => {
       const g = el("g", { class: "furn", "data-id": it.id, transform: xf(it) }, gFurn);
       g.innerHTML = itemInner(it);
     });
@@ -1755,7 +2149,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   const DIRS = [["left", -1, 0], ["right", 1, 0], ["up", 0, -1], ["down", 0, 1]];
   function gapsFor(it) {
     const [x0, y0, x1, y1] = aabb(it);
-    const boxes = items.filter(o => o !== it).map(aabb);
+    const boxes = TYPES[it.type].under ? [] : items.filter(o => o !== it && !TYPES[o.type].under).map(aabb);
     const out = { sides: {}, wall: false, item: false };
     out.item = boxes.some(b => b[0] < x1 - 1e-3 && b[2] > x0 + 1e-3 && b[1] < y1 - 1e-3 && b[3] > y0 + 1e-3);
     out.wall = crossesWall([x0, y0, x1, y1]);
@@ -1808,6 +2202,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     inspector.hidden = !it;
     inspEmpty.hidden = !!it;
     renderGaps(it);
+    if (V && mode === "3d") V.syncFurniture();
     if (!it) return;
     const g = el("g", { transform: xf(it) }, gSel);
     const w = it.L * 100, h = it.W * 100;
@@ -1836,8 +2231,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
 
   // ---- Palette ----
   const palEl = document.getElementById("palette");
-  palEl.innerHTML = Object.keys(TYPES).map(k => `
-    <div class="pi" data-type="${k}">
+  const tileHtml = k => `
+    <div class="pi" data-type="${k}" data-cat="${TYPES[k].cat}">
       <div class="thumb" tabindex="0" role="button">${thumbSvg(k, ...palette[k])}</div>
       <div>
         <div class="pi-name"><span class="pi-label"></span><button class="add" data-add="${k}"></button></div>
@@ -1846,8 +2241,44 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
           <label><span class="lab-w"></span><input type="number" id="pl-${k}-w" min="${MIN}" max="${MAX}" step="0.05" inputmode="decimal" dir="ltr"></label>
         </div>
       </div>
-    </div>`).join("");
+    </div>`;
+  palEl.innerHTML = CATS.map(c => `<div class="pal-h" data-cat="${c.id}"></div>` +
+    Object.keys(TYPES).filter(k => TYPES[k].cat === c.id).map(tileHtml).join("")).join("");
+  const LS_CAT = "apartment-plan-furniture-tab";
+  const tabsEl = document.getElementById("cat-tabs"), searchEl = document.getElementById("furn-search"), palEmpty = document.getElementById("pal-empty");
+  let palCat = lsGet(LS_CAT) || "all";
+  if (palCat !== "all" && !CATS.some(c => c.id === palCat)) palCat = "all";
+  tabsEl.innerHTML = ["all", ...CATS.map(c => c.id)].map(id => `<button class="tab" role="tab" data-cat="${id}"></button>`).join("");
+  function filterPalette() {
+    const raw = searchEl.value.trim(), q = raw.toLowerCase();
+    let shown = 0;
+    palEl.querySelectorAll(".pi").forEach(pi => {
+      const f = FURN[pi.dataset.type], c = CATS.find(x => x.id === f.category);
+      const inCat = q || palCat === "all" || f.category === palCat;   // a search looks in every category
+      const hit = !q || [f.en, f.ar, f.type, c.en, c.ar].join(" ").toLowerCase().includes(q);
+      pi.hidden = !(inCat && hit);
+      if (!pi.hidden) shown++;
+    });
+    palEl.querySelectorAll(".pal-h").forEach(hd => {
+      hd.hidden = !((palCat === "all" || q) && palEl.querySelector(`.pi[data-cat="${hd.dataset.cat}"]:not([hidden])`));
+    });
+    tabsEl.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", String(!q && b.dataset.cat === palCat)));
+    palEmpty.hidden = shown > 0;
+    palEmpty.textContent = shown ? "" : t("noMatch", raw);
+  }
+  tabsEl.addEventListener("click", e => {
+    const b = e.target.closest(".tab"); if (!b) return;
+    palCat = b.dataset.cat; lsSet(LS_CAT, palCat);
+    searchEl.value = "";
+    filterPalette();
+  });
+  searchEl.addEventListener("input", filterPalette);
   function renderPaletteText() {
+    tabsEl.setAttribute("aria-label", t("tabsAria"));
+    tabsEl.querySelectorAll(".tab").forEach(b => { b.textContent = catName(b.dataset.cat); });
+    palEl.querySelectorAll(".pal-h").forEach(hd => { hd.textContent = catName(hd.dataset.cat); });
+    searchEl.placeholder = t("searchPh"); searchEl.setAttribute("aria-label", t("searchAria"));
+    filterPalette();
     palEl.querySelectorAll(".pi").forEach(pi => {
       const k = pi.dataset.type, n = typeName(k);
       pi.querySelector(".pi-label").textContent = n;
@@ -1870,12 +2301,16 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   const readNum = inp => { const v = parseFloat(String(inp.value).replace(",", ".")); return isFinite(v) && v >= MIN && v <= MAX ? r2(v) : null; };
 
   function visibleCenter() {
+    if (mode === "3d") {
+      const c = V ? V.center() : { x: 6.7, y: 5.1 };
+      return { x: snapTo(Math.min(13, Math.max(1, c.x)), 0.05), y: snapTo(Math.min(10, Math.max(1, c.y)), 0.05) };
+    }
     const r = planScroll.getBoundingClientRect();
     const x1 = Math.max(r.left, 0), y1 = Math.max(r.top, 0), x2 = Math.min(r.right, innerWidth), y2 = Math.min(r.bottom, innerHeight);
     const p = toPlan({ clientX: (x1 + x2) / 2, clientY: (y1 + y2) / 2 });
     return { x: snapTo(Math.min(13, Math.max(1, p.x)), 0.05), y: snapTo(Math.min(10, Math.max(1, p.y)), 0.05) };
   }
-  const overPlan = e => { const r = planScroll.getBoundingClientRect(); return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom; };
+  const overPlan = e => { const r = (mode === "3d" ? view3d : planScroll).getBoundingClientRect(); return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom; };
 
   palEl.querySelectorAll(".pi").forEach(pi => {
     const k = pi.dataset.type, thumb = pi.querySelector(".thumb");
@@ -1946,6 +2381,13 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     if (!d || d.kind !== "new") return;
     d.chip.style.left = e.clientX + "px"; d.chip.style.top = e.clientY + "px";
     d.over = overPlan(e);
+    if (mode === "3d") {
+      // The chip follows the pointer; the piece lands where the pointer meets the floor
+      const p = d.over && V ? V.floorPoint(e) : null, st = step(e);
+      d.over = !!p; d.pos = p ? { x: snapTo(p.x, st), y: snapTo(p.y, st) } : null;
+      d.chip.style.display = ""; d.ghost.style.display = "none";
+      return;
+    }
     d.chip.style.display = d.over ? "none" : "";
     d.ghost.style.display = d.over ? "" : "none";
     if (d.over) {
@@ -2095,6 +2537,411 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     }
   }
 
+  // =====================================================================
+  // 3D view: floors, walls (no ceiling), doors, windows, railings and
+  // furniture, all built from the same plan data and drawn only in the
+  // page's own colours. three.js loads the first time 3D is opened.
+  // =====================================================================
+  // Heights in meters. Walls are 4 cm thick, centred on the 2D wall line
+  // (the same width the 2D drawing strokes them with).
+  const H3 = { wall: 2.8, door: 2.1, sill: 0.9, head: 2.1, rail: 1.0, t: 0.04 };
+  const LS_VIEW = "apartment-plan-view";
+  const view3d = document.getElementById("view3d"), v3Labels = document.getElementById("v3-labels"), v3Msg = document.getElementById("v3-msg");
+  const figLabel = document.getElementById("fig-label");
+  const btn2d = document.getElementById("view-2d"), btn3d = document.getElementById("view-3d");
+  const btnClear = document.getElementById("btn-clear");
+  const btns3d = ["btn-zin", "btn-zout", "btn-top", "btn-reset"].map(id => document.getElementById(id));
+  let mode = "2d", V = null, vLoad = null;
+
+  // Colours come from the page's CSS variables, so both themes just work
+  const rgba = s => {
+    s = String(s).trim();
+    if (s[0] === "#") { let h = s.slice(1); if (h.length === 3) h = h.split("").map(c => c + c).join(""); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)).concat(1); }
+    const n = (s.match(/[\d.]+/g) || [0, 0, 0]).map(Number);
+    return [n[0], n[1], n[2], n[3] == null ? 1 : n[3]];
+  };
+  const hexOf = c => "#" + c.slice(0, 3).map(v => Math.round(v).toString(16).padStart(2, "0")).join("");
+  const mix = (a, b, k) => { const A = rgba(a), B = rgba(b); return hexOf([0, 1, 2].map(i => A[i] + (B[i] - A[i]) * k)); };
+  const cssColors = () => {
+    const s = getComputedStyle(document.documentElement), g = k => s.getPropertyValue(k).trim();
+    return { paper: g("--paper"), floor: g("--floor"), raise: g("--raise"), ink: g("--ink"), mid: g("--mid"), lo: g("--lo"), faint: g("--faint"), line: g("--line"), grid: g("--grid"), lit: g("--lit") };
+  };
+
+  // Wall runs: every indoor room edge, minus the open edges, merged per wall line
+  function wallRuns() {
+    const lines = new Map();
+    const add = (o, c, a, b) => { const k = o + "|" + c.toFixed(3); if (!lines.has(k)) lines.set(k, []); lines.get(k).push([Math.min(a, b), Math.max(a, b)]); };
+    ROOMS.filter(r => !r.outdoor).forEach(r => r.rect.forEach(([x, y, w, h]) =>
+      [[x, y, x + w, y], [x, y + h, x + w, y + h], [x, y, x, y + h], [x + w, y, x + w, y + h]].flatMap(minusOpen)
+        .forEach(([x1, y1, x2, y2]) => near(y1, y2) ? add("h", y1, x1, x2) : add("v", x1, y1, y2))));
+    const runs = [];
+    lines.forEach((iv, k) => {
+      const [o, cs] = k.split("|"), c = +cs, merged = [];
+      iv.sort((p, q) => p[0] - q[0]).forEach(([a, b]) => {
+        const last = merged[merged.length - 1];
+        if (last && a <= last[1] + 1e-6) last[1] = Math.max(last[1], b); else merged.push([a, b]);
+      });
+      // Each run grows by half a wall thickness at both ends so corners close
+      merged.forEach(([a, b]) => runs.push({ o, c, a: a - H3.t / 2, b: b + H3.t / 2 }));
+    });
+    return runs;
+  }
+  // Wall pieces: full height between openings; doors leave wall above them,
+  // windows leave wall above and below
+  function wallPieces() {
+    const ops = [
+      ...D.doors.map(d => ({ o: d.geom[0], c: d.geom[1], a: d.geom[3], b: d.geom[4], lo: 0, hi: H3.door })),
+      ...D.windows.map(w => ({ o: w.geom[0], c: w.geom[1], a: w.geom[3], b: w.geom[4], lo: H3.sill, hi: H3.head })),
+    ];
+    const out = [];
+    wallRuns().forEach(r => {
+      let s = r.a;
+      ops.filter(p => p.o === r.o && near(p.c, r.c) && p.b > r.a && p.a < r.b).sort((p, q) => p.a - q.a).forEach(p => {
+        if (p.a > s + 1e-6) out.push({ ...r, a: s, b: p.a, y0: 0, y1: H3.wall });
+        if (p.lo > 0) out.push({ ...r, a: p.a, b: p.b, y0: 0, y1: p.lo });
+        out.push({ ...r, a: p.a, b: p.b, y0: p.hi, y1: H3.wall });
+        s = Math.max(s, p.b);
+      });
+      if (r.b > s + 1e-6) out.push({ ...r, a: s, b: r.b, y0: 0, y1: H3.wall });
+    });
+    return out;
+  }
+  // Furniture as simple blocks, in the piece's own frame (length along x, width along y, meters)
+  function furnParts(it) {
+    const L = it.L, W = it.W, x0 = -L / 2, y0 = -W / 2;
+    const R = (x, y, w, h, z0, z1) => ({ pts: [[x, y], [x + w, y], [x + w, y + h], [x, y + h]], z0, z1 });
+    const RND = (h, z0 = 0) => ({ pts: Array.from({ length: 32 }, (_, i) => [L / 2 * Math.cos(i * Math.PI / 16), W / 2 * Math.sin(i * Math.PI / 16)]), z0, z1: h });
+    const TBL = h => {
+      const g = 0.05, i = 0.04, legs = [[x0 + i, y0 + i], [x0 + L - i - g, y0 + i], [x0 + i, y0 + W - i - g], [x0 + L - i - g, y0 + W - i - g]];
+      return [R(x0, y0, L, W, h - 0.04, h), ...legs.map(([x, y]) => R(x, y, g, g, 0, h - 0.04))];
+    };
+    // Plain blocks at typical heights (m) for the rest of the catalogue
+    const BLOCK = { wardrobe: 2.0, nightstand: 0.55, dresser: 0.85, vanity: 0.78, tv: 0.5, bookcase: 1.9, sideboard: 0.85, counter: 0.9,
+      fridge: 1.8, washer: 0.85, shower: 0.05, bathtub: 0.55, toilet: 0.75, basin: 0.85, rug: 0.01 };
+    if (it.type === "bed" || it.type === "sbed") { const hb = Math.min(0.08, L * 0.06); return [R(x0 + hb, y0, L - hb, W, 0, 0.5), R(x0, y0, hb, W, 0, 0.95)]; }
+    if (BLOCK[it.type]) return [R(x0, y0, L, W, 0, BLOCK[it.type])];
+    const shrink = (p, k) => ({ ...p, pts: p.pts.map(([x, y]) => [x * k, y * k]) });
+    if (it.type === "rtable") return [RND(0.75, 0.71), shrink(RND(0.71), 0.12)];   // top and a centre stem
+    if (it.type === "plant") return [shrink(RND(0.4), 0.6), RND(1.1, 0.4)];        // pot and foliage
+    if (it.type === "coffee") return TBL(0.42);
+    if (it.type === "desk" || it.type === "dining") return TBL(0.75);
+    if (it.type === "sofa" || it.type === "armchair") {
+      const a = Math.min(0.18, L * 0.12), b = Math.min(0.2, W * 0.25);
+      return [R(x0 + a, y0 + b, L - 2 * a, W - b, 0, 0.42), R(x0, y0, L, b, 0, 0.85), R(x0, y0 + b, a, W - b, 0, 0.62), R(x0 + L - a, y0 + b, a, W - b, 0, 0.62)];
+    }
+    if (it.type === "lsofa") {
+      const d = Math.min(0.95, W * 0.6, L * 0.5), b = Math.min(0.2, d * 0.22), a = Math.min(0.18, d * 0.2);
+      return [
+        { pts: [[x0 + a, y0 + b], [x0 + L - b, y0 + b], [x0 + L - b, y0 + W - a], [x0 + L - d, y0 + W - a], [x0 + L - d, y0 + d], [x0 + a, y0 + d]], z0: 0, z1: 0.42 },
+        R(x0, y0, L, b, 0, 0.85), R(x0 + L - b, y0 + b, b, W - b, 0, 0.85),
+        R(x0, y0 + b, a, d - b, 0, 0.62), R(x0 + L - d, y0 + W - a, d - b, a, 0, 0.62),
+      ];
+    }
+    if (it.type === "chair") { const b = Math.max(0.06, W * 0.16); return [R(x0, y0 + b, L, W - b, 0, 0.45), R(x0, y0, L, b, 0, 0.9)]; }
+    if (it.type === "table") return TBL(0.75);
+    return [R(x0, y0, L, W, 0, 0.5)];
+  }
+  // Same transform as the 2D drawing: translate, rotate clockwise, then flip
+  const furnToPlan = (it, lx, ly) => {
+    const fx = it.flip ? -lx : lx, a = it.rot * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
+    return [it.x + fx * c - ly * s, it.y + fx * s + ly * c];
+  };
+
+  function make3d(THREE, OrbitControls) {
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    const cv = renderer.domElement;
+    view3d.prepend(cv);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, 1.2, 0.1, 200);
+    const controls = new OrbitControls(camera, cv);
+    controls.enableDamping = true; controls.dampingFactor = 0.12;
+    controls.minDistance = 2.5; controls.maxDistance = 45;
+    controls.maxPolarAngle = Math.PI / 2 - 0.04;   // never under the floor
+    controls.screenSpacePanning = false;            // pan slides along the floor
+    controls.zoomToCursor = true;
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Plan x → world X, plan y → world Z, height → world Y
+    const ext = ROOMS.flatMap(r => r.rect).reduce((b, [x, y, w, h]) => [Math.min(b[0], x), Math.min(b[1], y), Math.max(b[2], x + w), Math.max(b[3], y + h)], [Infinity, Infinity, -Infinity, -Infinity]);
+    const center = new THREE.Vector3((ext[0] + ext[2]) / 2, 0, (ext[1] + ext[3]) / 2);
+    const V3 = (x, y, h = 0) => new THREE.Vector3(x, h, y);
+
+    const solid = () => new THREE.MeshBasicMaterial({ polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
+    const M = {
+      faceX: solid(), faceZ: solid(), top: solid(),
+      edge: new THREE.LineBasicMaterial(), fine: new THREE.LineBasicMaterial(),
+      dash: new THREE.LineDashedMaterial({ dashSize: 0.09, gapSize: 0.07 }),
+      gridMinor: new THREE.LineBasicMaterial({ transparent: true, depthWrite: false }),
+      gridMajor: new THREE.LineBasicMaterial({ transparent: true, depthWrite: false }),
+      fTop: solid(), fSide: solid(), selTop: solid(), selEdge: new THREE.LineBasicMaterial(),
+    };
+    const wallMats = [M.faceX, M.faceX, M.top, M.faceZ, M.faceZ, M.faceZ];   // +x −x +y −y +z −z
+    const g3 = new THREE.Group(); scene.add(g3);
+    const hits = [];
+    const addLine = (pts, mat, parent = g3, dashed = false) => {
+      const o = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), mat);
+      if (dashed) o.computeLineDistances();
+      parent.add(o); return o;
+    };
+    // A box from (x0..x1, y0..y1 height, z0..z1), drawn with ink outlines
+    const addBox = (x0, x1, y0, y1, z0, z1) => {
+      const geo = new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0);
+      const mesh = new THREE.Mesh(geo, wallMats);
+      mesh.position.set((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+      const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo), M.edge);
+      e.position.copy(mesh.position);
+      g3.add(mesh, e); hits.push(mesh);
+    };
+
+    // Floors: every room at exactly its clear inside size
+    const floors = [];
+    const addFloor = (x, y, w, h, id, kind) => {
+      const geo = new THREE.PlaneGeometry(w, h); geo.rotateX(-Math.PI / 2);
+      const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial());
+      mesh.position.set(x + w / 2, 0, y + h / 2);
+      mesh.userData.room = id;
+      g3.add(mesh); hits.push(mesh); floors.push({ id, kind, mesh });
+    };
+    ROOMS.forEach(r => r.rect.forEach(([x, y, w, h]) => addFloor(x, y, w, h, r.id, r.outdoor ? "terr" : "room")));
+    D.outsideTheApartment.forEach(o => addFloor(...o.rect, null, "out"));
+    const lift = D.outsideTheApartment[1].rect, F = 0.004;
+    addLine([V3(lift[0], lift[1], F), V3(lift[0] + lift[2], lift[1] + lift[3], F)], M.fine);
+    addLine([V3(lift[0] + lift[2], lift[1], F), V3(lift[0], lift[1] + lift[3], F)], M.fine);
+
+    // Walls, no ceiling
+    const T2 = H3.t / 2;
+    wallPieces().forEach(p => p.o === "h"
+      ? addBox(p.a, p.b, p.y0, p.y1, p.c - T2, p.c + T2)
+      : addBox(p.c - T2, p.c + T2, p.y0, p.y1, p.a, p.b));
+
+    // Glass: a thin outline in each window and sliding door
+    const pane = (o, c, a1, a2, lo, hi) => {
+      const q = (a, h) => o === "h" ? V3(a, c, h) : V3(c, a, h);
+      addLine([q(a1, lo), q(a2, lo), q(a2, hi), q(a1, hi), q(a1, lo)], M.fine);
+      addLine([q((a1 + a2) / 2, lo), q((a1 + a2) / 2, hi)], M.fine);
+    };
+    D.windows.forEach(w => pane(w.geom[0], w.geom[1], w.geom[3], w.geom[4], H3.sill, H3.head));
+    // Hinged doors: the leaf and swing drawn on the floor, as in the plan
+    D.doors.forEach(d => {
+      const [o, c, , a1, a2, hs, side] = d.geom;
+      if (d.type === "sliding") { pane(o, c, a1, a2, 0, H3.door); return; }
+      const L = a2 - a1, ha = hs ? a1 : a2, oa = hs ? a2 : a1;
+      const Hp = P(o, ha, c), tip = P(o, ha, c + side * L), J = P(o, oa, c);
+      const t1 = Math.atan2(tip[1] - Hp[1], tip[0] - Hp[0]);
+      let dt = Math.atan2(J[1] - Hp[1], J[0] - Hp[0]) - t1;
+      if (dt > Math.PI) dt -= 2 * Math.PI; if (dt < -Math.PI) dt += 2 * Math.PI;
+      addLine([V3(Hp[0], Hp[1], F), V3(tip[0], tip[1], F)], M.edge);
+      addLine(Array.from({ length: 21 }, (_, i) => V3(Hp[0] + L * Math.cos(t1 + dt * i / 20), Hp[1] + L * Math.sin(t1 + dt * i / 20), F)), M.fine);
+    });
+    // Open edges between spaces: dashed on the floor
+    D.openEdges.forEach(e => { const [x1, y1, x2, y2] = e.line; addLine([V3(x1, y1, F), V3(x2, y2, F)], M.dash, g3, true); });
+    // Terrace railings: a top rail with posts
+    const RT = 0.02;
+    D.railings.forEach(pts => {
+      for (let i = 0; i < pts.length - 1; i++) {
+        const [ax, ay] = pts[i], [bx, by] = pts[i + 1];
+        addBox(Math.min(ax, bx) - RT, Math.max(ax, bx) + RT, H3.rail - 2 * RT, H3.rail, Math.min(ay, by) - RT, Math.max(ay, by) + RT);
+        const len = Math.hypot(bx - ax, by - ay), n = Math.max(1, Math.ceil(len / 1.0));
+        for (let k = i === 0 ? 0 : 1; k <= n; k++) {
+          const x = ax + (bx - ax) * k / n, y = ay + (by - ay) * k / n;
+          addBox(x - RT, x + RT, 0, H3.rail - 2 * RT, y - RT, y + RT);
+        }
+      }
+    });
+
+    // Grid: 0.5 m, stronger each 1 m, the same extent as the plan's
+    const gridG = new THREE.Group(); scene.add(gridG);
+    const gridPts = [[], []];
+    for (let i = 0; i <= 28; i++) gridPts[i % 2 ? 0 : 1].push(V3(i / 2, 0, F / 2), V3(i / 2, 11, F / 2));
+    for (let i = 0; i <= 22; i++) gridPts[i % 2 ? 0 : 1].push(V3(0, i / 2, F / 2), V3(14, i / 2, F / 2));
+    gridG.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(gridPts[0]), M.gridMinor));
+    gridG.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(gridPts[1]), M.gridMajor));
+    gridG.visible = btnGrid.getAttribute("aria-pressed") === "true";
+
+    // Furniture
+    const furnG = new THREE.Group(); scene.add(furnG);
+    function syncFurniture() {
+      furnG.children.forEach(o => o.geometry.dispose());
+      furnG.clear();
+      items.forEach(it => {
+        const sel = it.id === selId;
+        furnParts(it).forEach(p => {
+          const shape = new THREE.Shape(p.pts.map(([lx, ly]) => new THREE.Vector2(...furnToPlan(it, lx, ly))));
+          const geo = new THREE.ExtrudeGeometry(shape, { depth: p.z1 - p.z0, bevelEnabled: false });
+          geo.rotateX(Math.PI / 2); geo.translate(0, p.z1, 0);   // shape plane → floor, extruded upward
+          const mesh = new THREE.Mesh(geo, [sel ? M.selTop : M.fTop, M.fSide]);
+          mesh.userData.id = it.id;
+          furnG.add(mesh, new THREE.LineSegments(new THREE.EdgesGeometry(geo, 30), sel ? M.selEdge : M.edge));
+        });
+      });
+      need = true;
+    }
+
+    // Room labels: HTML over the canvas, in the page's fonts and language
+    const labels = [];
+    function relabel() {
+      v3Labels.replaceChildren(); labels.length = 0;
+      const ar = isAr();
+      const add = (x, y, html, cls) => {
+        const d = document.createElement("div");
+        d.className = "l3" + (cls ? " " + cls : ""); d.dir = ar ? "rtl" : "ltr"; d.innerHTML = html;
+        v3Labels.appendChild(d); labels.push({ el: d, v: V3(x, y, 0.02) });
+      };
+      ROOMS.forEach(r => {
+        const o = LABEL[r.id] === undefined ? {} : LABEL[r.id];
+        if (o === false) return;
+        const [x, y, w, h] = r.rect[0];
+        const sub = r.across != null ? dimText(r) : `${fmt(r.area)} ${t("m2")}`;
+        add(x + w / 2 + (o.dx || 0), y + h / 2 + (o.dy || 0), `<b>${esc(nameOf(r))}</b><span dir="ltr">${esc(sub)}</span>`, (o.s || 1) < 0.8 ? "sm" : "");
+      });
+      add(5.84, 9.45, `<span>${esc(t("lightwell"))}</span>`, "note");
+      add(11.38, 10.42, `<b>${esc(t("entrance"))}</b>`, "tag");
+      need = true;
+    }
+    const tmp = new THREE.Vector3();
+    function placeLabels() {
+      const w = view3d.clientWidth, h = view3d.clientHeight;
+      const k = Math.min(1.3, Math.max(0.72, 17 / camera.position.distanceTo(controls.target)));
+      v3Labels.style.setProperty("--k", k.toFixed(3));
+      labels.forEach(l => {
+        tmp.copy(l.v).project(camera);
+        const vis = tmp.z < 1 && Math.abs(tmp.x) < 1.1 && Math.abs(tmp.y) < 1.1;
+        l.el.style.display = vis ? "" : "none";
+        if (vis) l.el.style.transform = `translate(${((tmp.x + 1) / 2 * w).toFixed(1)}px, ${((1 - tmp.y) / 2 * h).toFixed(1)}px) translate(-50%, -50%)`;
+      });
+    }
+
+    // Colours
+    let C = null;
+    function paintHot() {
+      if (!C) return;
+      floors.forEach(f => f.mesh.material.color.set(
+        f.kind === "out" ? C.faint : f.kind === "terr" ? (f.id === hotId ? C.faint : C.raise) : (f.id === hotId ? C.raise : C.floor)));
+      need = true;
+    }
+    function recolor() {
+      const c = cssColors();
+      C = { floor: hexOf(rgba(c.floor)), raise: hexOf(rgba(c.raise)), faint: hexOf(rgba(c.faint)) };
+      renderer.setClearColor(hexOf(rgba(c.paper)));
+      M.faceX.color.set(mix(c.paper, c.ink, 0.075)); M.faceZ.color.set(mix(c.paper, c.ink, 0.035));
+      M.top.color.set(hexOf(rgba(c.ink))); M.edge.color.set(hexOf(rgba(c.ink)));
+      M.fine.color.set(hexOf(rgba(c.lo))); M.dash.color.set(hexOf(rgba(c.lo)));
+      const g = rgba(c.grid);
+      M.gridMinor.color.set(hexOf(g)); M.gridMinor.opacity = g[3];
+      M.gridMajor.color.set(hexOf(g)); M.gridMajor.opacity = Math.min(1, g[3] * 2);
+      M.fTop.color.set(hexOf(rgba(c.raise))); M.fSide.color.set(mix(c.paper, c.ink, 0.05));
+      M.selTop.color.set(hexOf(rgba(c.line))); M.selEdge.color.set(hexOf(rgba(c.lit)));
+      paintHot();
+    }
+
+    // Camera: a three-quarter view from the plan's bottom edge, so left and right match the 2D plan
+    const fit = () => Math.max(1, 1.25 / (camera.aspect || 1.2));
+    const HOME = () => ({ pos: center.clone().add(new THREE.Vector3(-3, 13.2, 15).multiplyScalar(fit())), target: center.clone().add(new THREE.Vector3(0, 0, 0.6)) });
+    const TOP = () => ({ pos: center.clone().add(new THREE.Vector3(0, 19 * fit(), 0.001)), target: center.clone() });
+    let anim = null, need = true, running = false, raf = 0;
+    function fly(to, ms = 450) {
+      anim = { p0: camera.position.clone(), t0: controls.target.clone(), p1: to.pos, t1: to.target, s: performance.now(), ms: reduced ? 1 : ms };
+    }
+    function zoom(f) {
+      const off = camera.position.clone().sub(controls.target);
+      const d = Math.min(controls.maxDistance, Math.max(controls.minDistance, off.length() * f));
+      fly({ pos: controls.target.clone().add(off.setLength(d)), target: controls.target.clone() }, 250);
+    }
+    controls.addEventListener("change", () => { need = true; });
+    controls.addEventListener("start", () => { anim = null; });
+
+    function resize() {
+      const w = view3d.clientWidth, h = view3d.clientHeight;
+      if (!w || !h) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+      need = true;
+    }
+    new ResizeObserver(resize).observe(view3d);
+
+    function frame(now) {
+      if (!running) return;
+      raf = requestAnimationFrame(frame);
+      if (anim) {
+        const k = Math.min(1, (now - anim.s) / anim.ms), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        camera.position.lerpVectors(anim.p0, anim.p1, e);
+        controls.target.lerpVectors(anim.t0, anim.t1, e);
+        if (k >= 1) anim = null;
+        need = true;
+      }
+      if (controls.update()) need = true;
+      if (need) { need = false; renderer.render(scene, camera); placeLabels(); }
+    }
+
+    // Pointer: hover shows the room and floor position; a click selects a piece
+    const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const aim = e => {
+      const r = cv.getBoundingClientRect();
+      ndc.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+    };
+    const floorPoint = e => { aim(e); const p = new THREE.Vector3(); return ray.ray.intersectPlane(ground, p) ? { x: p.x, y: p.z } : null; };
+    let down = null;
+    cv.addEventListener("pointerdown", e => { down = { x: e.clientX, y: e.clientY, b: e.button }; view3d.classList.add("dragging"); });
+    cv.addEventListener("pointerup", e => {
+      view3d.classList.remove("dragging");
+      if (down && down.b === 0 && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 5) {
+        aim(e);
+        const h = ray.intersectObjects([...hits, ...furnG.children.filter(o => o.isMesh)], false)[0];
+        select(h && h.object.userData.id ? h.object.userData.id : null);
+      }
+      down = null;
+    });
+    cv.addEventListener("pointermove", e => {
+      if (e.buttons) return;
+      aim(e);
+      const h = ray.intersectObjects(hits, false)[0], id = h ? h.object.userData.room || null : null;
+      const p = floorPoint(e);
+      coordP = p && p.x > -1 && p.x < 15 && p.y > -1 && p.y < 12 ? p : null;
+      if (id !== hotId) setHot(id); else paint();
+    });
+    cv.addEventListener("pointerleave", () => { view3d.classList.remove("dragging"); coordP = null; setHot(null); });
+
+    recolor(); relabel(); syncFurniture(); resize();
+    const h0 = HOME(); camera.position.copy(h0.pos); controls.target.copy(h0.target); controls.update();
+
+    return {
+      start() { if (running) return; running = true; resize(); need = true; raf = requestAnimationFrame(frame); },
+      stop() { running = false; cancelAnimationFrame(raf); },
+      recolor, relabel, paintHot, syncFurniture, floorPoint, zoom,
+      setGrid(on) { gridG.visible = on; need = true; },
+      reset() { fly(HOME()); }, top() { fly(TOP()); },
+      center() { return { x: controls.target.x, y: controls.target.z }; },
+    };
+  }
+
+  function ensure3d() {
+    if (V) return Promise.resolve(V);
+    if (!vLoad) {
+      v3Msg.dataset.k = "v3Loading"; v3Msg.textContent = t("v3Loading"); v3Msg.hidden = false;
+      vLoad = Promise.all([import("three"), import("three/addons/controls/OrbitControls.js")])
+        .then(([THREE, oc]) => { V = make3d(THREE, oc.OrbitControls); delete v3Msg.dataset.k; v3Msg.hidden = true; return V; })
+        .catch(err => { vLoad = null; v3Msg.dataset.k = "v3Fail"; v3Msg.textContent = t("v3Fail"); v3Msg.hidden = false; console.error(err); throw err; });
+    }
+    return vLoad;
+  }
+  function setView(v, remember = true) {
+    if (v !== "2d" && v !== "3d") return;
+    if (remember) lsSet(LS_VIEW, v);
+    mode = v;
+    const is3 = v === "3d";
+    setPressed(btn2d, !is3); setPressed(btn3d, is3);
+    if (is3 && measuring) setMeasure(false);
+    planScroll.hidden = is3; view3d.hidden = !is3;
+    btnMeasure.hidden = is3; btnClear.hidden = is3;
+    btns3d.forEach(b => { b.hidden = !is3; });
+    figLabel.dataset.i18n = is3 ? "figLabel3d" : "figLabel"; figLabel.textContent = t(figLabel.dataset.i18n);
+    coordP = null; setHot(null); renderHint();
+    if (is3) ensure3d().then(v3 => { if (mode === "3d") { v3.syncFurniture(); v3.paintHot(); v3.start(); } }).catch(() => {});
+    else if (V) V.stop();
+  }
+
   // ---- Language and theme switchers ----
   function applyLang() {
     const d = document.documentElement;
@@ -2108,6 +2955,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     renderPaletteText(); renderItems();
     if (!clearBtn.dataset.armed) clearBtn.textContent = t("clearAll");
     saveEl.textContent = t("save_" + saveKey);
+    if (v3Msg.dataset.k) v3Msg.textContent = t(v3Msg.dataset.k);
+    if (V) V.relabel();
   }
   function setLang(l) {
     if (l !== "en" && l !== "ar") return;
@@ -2124,14 +2973,22 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     setPressed(document.getElementById("look-white"), !black);
     setPressed(document.getElementById("look-black"), black);
   };
-  const setLook = v => { document.documentElement.setAttribute("data-look", v); lsSet(LS_LOOK, v); paintLook(); };
+  const setLook = v => { document.documentElement.setAttribute("data-look", v); lsSet(LS_LOOK, v); paintLook(); if (V) V.recolor(); };
   document.getElementById("look-white").addEventListener("click", () => setLook("white"));
   document.getElementById("look-black").addEventListener("click", () => setLook("black"));
+
+  btn2d.addEventListener("click", () => setView("2d"));
+  btn3d.addEventListener("click", () => setView("3d"));
+  document.getElementById("btn-zin").addEventListener("click", () => V && V.zoom(0.8));
+  document.getElementById("btn-zout").addEventListener("click", () => V && V.zoom(1.25));
+  document.getElementById("btn-top").addEventListener("click", () => V && V.top());
+  document.getElementById("btn-reset").addEventListener("click", () => V && V.reset());
 
   // ---- Start ----
   renderPalette();
   applyLang();
   paintLook();
+  if (lsGet(LS_VIEW) === "3d") setView("3d", false);
   (async () => {
     let db = null;
     try {

@@ -30,6 +30,10 @@ Then delete the `src/check-*.js` files it leaves behind (they are only for synta
 
 The full method, assumptions and coordinates are stored in each page in the `plan-data` JSON block and the `plan:*` meta tags.
 
+## 3D view
+
+The 2D / 3D switch at the top swaps the plan for a 3D model built from the same plan data, in the page's own colours. Walls are 2.80 m high and 4 cm thick, centred on the 2D wall lines, with no ceiling. Doors are openings 2.10 m high, windows run from 0.90 m to 2.10 m, and terrace railings are 1.00 m. Furniture shows as simple blocks at typical heights; click a piece to select it, then edit it from the panel. Drag to turn, scroll or pinch to zoom, right-drag to move; Zoom in/out, Top view and Reset view sit under the drawing. three.js 0.160.0 loads from jsDelivr the first time 3D opens.
+
 ## Furniture
 
 Bed, L-Sofa, Sofa, Chair, Wardrobe and Table. Set a length and width in meters, drag a copy onto the plan, then move, resize (corner handle), rotate, flip, duplicate or remove it.
