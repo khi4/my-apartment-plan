@@ -1669,6 +1669,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     thumb.addEventListener("pointerdown", e => {
       if (e.button !== 0) return;
       e.preventDefault();
+      abortDrag();
       if (measuring) setMeasure(false);
       const [L, W] = palette[k];
       const chip = document.createElement("div");
@@ -1680,12 +1681,40 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       try { thumb.setPointerCapture(e.pointerId); } catch (_) {}
       moveNew(e);
     });
-    thumb.addEventListener("pointermove", e => { if (fdrag && fdrag.kind === "new" && e.pointerId === fdrag.pid) moveNew(e); });
-    thumb.addEventListener("pointerup", e => { if (fdrag && fdrag.kind === "new" && e.pointerId === fdrag.pid) endNew(false); });
-    thumb.addEventListener("pointercancel", () => { if (fdrag && fdrag.kind === "new") endNew(true); });
   });
+
+  // ---- Drag lifecycle ----
+  // One set of page-wide listeners ends every drag, wherever the pointer is
+  // released, so a preview can never be left behind on the plan.
+  function finishDrag(e, cancel) {
+    if (!fdrag) return;
+    if (fdrag.kind === "new") {
+      if (e && !cancel) moveNew(e);
+      endNew(cancel);
+    } else {
+      const moved = fdrag.moved; fdrag = null;
+      if (moved) save();
+    }
+  }
+  function abortDrag() {
+    finishDrag(null, true);
+    gGhost.replaceChildren();
+    document.querySelectorAll("body > .chip").forEach(c => c.remove());
+  }
+  document.addEventListener("pointermove", e => {
+    if (!fdrag || e.pointerId !== fdrag.pid) return;
+    // The button is already up: the release happened somewhere we didn't hear about
+    if (e.pointerType === "mouse" && e.buttons === 0) { finishDrag(null, false); return; }
+    if (fdrag.kind === "new") moveNew(e); else dragOnPlan(e);
+  }, true);
+  document.addEventListener("pointerup", e => { if (fdrag && e.pointerId === fdrag.pid) finishDrag(e, false); }, true);
+  document.addEventListener("pointercancel", e => { if (fdrag && e.pointerId === fdrag.pid) finishDrag(null, fdrag.kind === "new"); }, true);
+  window.addEventListener("blur", () => { if (fdrag) finishDrag(null, fdrag.kind === "new"); });
+  document.addEventListener("visibilitychange", () => { if (document.hidden && fdrag) finishDrag(null, fdrag.kind === "new"); });
+
   function moveNew(e) {
     const d = fdrag;
+    if (!d || d.kind !== "new") return;
     d.chip.style.left = e.clientX + "px"; d.chip.style.top = e.clientY + "px";
     d.over = overPlan(e);
     d.chip.style.display = d.over ? "none" : "";
@@ -1698,6 +1727,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   }
   function endNew(cancel) {
     const d = fdrag; fdrag = null;
+    if (!d) return;
     d.chip.remove(); d.ghost.remove();
     if (!cancel && d.over && d.pos) addItem(d.type, d.L, d.W, d.pos.x, d.pos.y);
   }
@@ -1707,6 +1737,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     if (measuring || e.button !== 0) return;
     const g = e.target.closest(".furn"); if (!g) return;
     e.stopPropagation(); e.preventDefault();
+    abortDrag();
     const it = items.find(i => i.id === g.dataset.id); if (!it) return;
     select(it.id);
     const p = toPlan(e);
@@ -1716,13 +1747,16 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   gSel.addEventListener("pointerdown", e => {
     if (measuring || e.button !== 0 || !e.target.dataset.handle) return;
     e.stopPropagation(); e.preventDefault();
+    abortDrag();
     const it = selected(); if (!it) return;
     fdrag = { kind: "resize", it, pid: e.pointerId, moved: false };
     try { svg.setPointerCapture(e.pointerId); } catch (_) {}
   });
-  svg.addEventListener("pointerdown", () => { if (!measuring && !fdrag) select(null); });
-  svg.addEventListener("pointermove", e => {
-    if (!fdrag || fdrag.kind === "new" || e.pointerId !== fdrag.pid) return;
+  svg.addEventListener("pointerdown", () => {
+    if (fdrag) abortDrag();   // a leftover drag never blocks the plan
+    if (!measuring) select(null);
+  });
+  function dragOnPlan(e) {
     const p = toPlan(e), st = step(e), it = fdrag.it;
     if (fdrag.kind === "move") {
       it.x = snapTo(p.x + fdrag.dx, st); it.y = snapTo(p.y + fdrag.dy, st);
@@ -1738,14 +1772,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     }
     fdrag.moved = true;
     updateItem(it);
-  });
-  const endDrag = e => {
-    if (!fdrag || fdrag.kind === "new" || e.pointerId !== fdrag.pid) return;
-    const moved = fdrag.moved; fdrag = null;
-    if (moved) save();
-  };
-  svg.addEventListener("pointerup", endDrag);
-  svg.addEventListener("pointercancel", endDrag);
+  }
 
   // ---- Inspector ----
   const onInsp = () => {
