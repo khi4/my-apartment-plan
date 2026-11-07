@@ -4,12 +4,13 @@ A 2D floor plan of a 3-bedroom apartment, drawn to scale in meters, with furnitu
 
 | File | What it is |
 |---|---|
-| `apartment-plan.html` | White version |
-| `apartment-plan-black.html` | Black version |
+| `index.html` | The plan (home page of the site), opens in white |
+| `apartment-plan.html` | The plan, opens in white (same as `index.html`) |
+| `apartment-plan-black.html` | The plan, opens in black |
 | `src/plan-template.html` | The source both versions are built from |
 | `src/build.py` | Builds both versions from the template |
 
-Open either HTML file in a browser. Outside Claude, the furniture layout is saved in that browser only.
+Open `index.html` in a browser. Every page has an English/Arabic switch and a White/Black switch. Outside Claude, the furniture layout is saved in that browser only.
 
 ## Rebuild
 
