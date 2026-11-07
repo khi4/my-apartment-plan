@@ -121,7 +121,7 @@ kbd { font-family: var(--f-mono); font-size: 10.5px; border: 1px solid var(--lin
 @media (max-width: 1000px) { .panel { position: static; max-height: none; } }
 .panel-sec { padding: 12px 14px; border-bottom: 1px solid var(--faint); }
 .panel-sec:last-child { border-bottom: 0; }
-.insp-slot { min-height: 226px; box-sizing: border-box; }
+.insp-slot { min-height: 312px; box-sizing: border-box; }
 .panel .cap { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .pal { display: grid; gap: 12px; }
 @media (max-width: 1000px) and (min-width: 560px) { .pal { grid-template-columns: 1fr 1fr; } }
@@ -157,6 +157,17 @@ kbd { font-family: var(--f-mono); font-size: 10.5px; border: 1px solid var(--lin
 .sel-box { fill: none; stroke: var(--lit); stroke-width: 2; stroke-dasharray: 7 5; pointer-events: none; }
 .sel-handle { fill: var(--paper); stroke: var(--lit); stroke-width: 2.5; cursor: nwse-resize; touch-action: none; }
 .sel-text { direction: ltr; font-family: var(--f-mono); font-size: 20px; font-weight: 500; fill: var(--lit); paint-order: stroke; stroke: var(--paper); stroke-width: 7px; stroke-linejoin: round; pointer-events: none; }
+
+/* Clearance around the selected piece */
+.gaps { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--faint); }
+.gap-row { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 5px; font-family: var(--f-mono); font-size: 13px; color: var(--mid); direction: ltr; font-variant-numeric: tabular-nums; }
+html[lang="ar"] .gap-row { justify-content: flex-end; }
+.gap-row b { color: var(--ink); font-weight: 500; }
+.warn { margin: 6px 0 0; font-size: 12px; font-weight: 500; color: var(--ink); }
+.warn::before { content: "▲ "; font-size: 10px; }
+.gap-line { stroke: var(--lit); stroke-width: 1.6; stroke-dasharray: 5 4; }
+.gap-tick { stroke: var(--lit); stroke-width: 2; }
+.gap-text { font-family: var(--f-mono); font-size: 17px; font-weight: 500; fill: var(--lit); paint-order: stroke; stroke: var(--paper); stroke-width: 6px; stroke-linejoin: round; direction: ltr; }
 
 /* Rooms (collapsible) */
 details.rooms { margin: 0; border-top: 1px solid var(--ink); }
@@ -1057,6 +1068,11 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
           <button class="act" id="act-dup" data-i18n="dup">Duplicate</button>
           <button class="act" id="act-del" data-i18n="del">Remove</button>
         </div>
+        <div class="gaps">
+          <div class="cap"><span data-i18n="gapsTitle">Space around</span></div>
+          <div class="gap-row" id="gap-row"></div>
+          <p class="warn" id="gap-warn" hidden></p>
+        </div>
         <p class="small" data-i18n="inspHint">Drag to move. Drag the corner square to resize. Keys: R rotate, F flip, D duplicate, Delete remove, arrows nudge 5 cm. Hold Shift for 1 cm steps.</p>
       </div>
     </div>
@@ -1156,6 +1172,9 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       dataNote: "Every number on this page comes from one data block stored in the page itself.",
       copy: "Copy plan data (JSON)", copied: "Copied", copySel: "Selected below. Press Cmd/Ctrl+C", showData: "Show plan data",
       lightwell: "Light well (not part of the apartment)", lift1: "Lift /", lift2: "shaft", entrance: "ENTRANCE",
+      gapsTitle: "Space around", gapsNote: "Clear distance from each side to the nearest wall or piece. The smallest gap along the side is shown.",
+      dir_left: "Left", dir_right: "Right", dir_up: "Above", dir_down: "Below",
+      overlapWall: "Overlaps a wall", overlapItem: "Overlaps another piece",
     },
     ar: {
       docTitle: "مسقط شقة 3 غرف نوم", eyebrow: "مسقط أفقي · بمقياس رسم · بالمتر", title: "مسقط شقة 3 غرف نوم",
@@ -1192,6 +1211,9 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       dataNote: "كل رقم في هذه الصفحة مأخوذ من كتلة بيانات واحدة محفوظة داخل الصفحة نفسها.",
       copy: "نسخ بيانات المسقط (JSON)", copied: "تم النسخ", copySel: "تم التحديد بالأسفل، اضغط Cmd/Ctrl+C", showData: "عرض بيانات المسقط",
       lightwell: "منور (ليس جزءًا من الشقة)", lift1: "مصعد /", lift2: "بئر", entrance: "المدخل",
+      gapsTitle: "المسافة حولها", gapsNote: "المسافة الصافية من كل جانب إلى أقرب حائط أو قطعة. يظهر أصغر فراغ على طول الجانب.",
+      dir_left: "يسار", dir_right: "يمين", dir_up: "أعلى", dir_down: "أسفل",
+      overlapWall: "تتداخل مع حائط", overlapItem: "تتداخل مع قطعة أخرى",
     },
   };
   const lsGet = k => { try { return localStorage.getItem(k); } catch (_) { return null; } };
@@ -1218,7 +1240,8 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
   const layer = id => el("g", { id }, svg);
   const gOut = layer("outside"), gWall = layer("walls"), gFloor = layer("floors"), gOpen = layer("openings"),
         gEdge = layer("edges"), gGrid = layer("grid"), gLab = layer("labels"), gFurn = layer("furniture"),
-        gSel = layer("selection"), gGhost = layer("ghost"), gRul = layer("rulers"), gMeas = layer("measure");
+        gSel = layer("selection"), gGap = layer("gaps"), gGhost = layer("ghost"), gRul = layer("rulers"), gMeas = layer("measure");
+  gGap.setAttribute("pointer-events", "none");
   gGrid.setAttribute("pointer-events", "none");
   gLab.setAttribute("class", "labels");
   gRul.setAttribute("class", "ruler");
@@ -1575,11 +1598,95 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     g.innerHTML = itemInner(it);
     renderSel();
   }
+  // ---- Clearance: distance from each side of a piece to the nearest wall or piece ----
+  // Free floor = every room's clear inside rectangle (walls and door gaps are not floor),
+  // so a ray stops at a wall face and passes through open edges between spaces.
+  const FREE = ROOMS.flatMap(r => r.rect);
+  const inFree = (x, y) => FREE.some(([rx, ry, rw, rh]) => x >= rx - 1e-6 && x <= rx + rw + 1e-6 && y >= ry - 1e-6 && y <= ry + rh + 1e-6);
+  function wallDist(x, y, dx, dy) {
+    let tt = 0;
+    for (let guard = 0; guard < 24; guard++) {
+      const px = x + dx * (tt + 1e-4), py = y + dy * (tt + 1e-4);
+      const r = FREE.find(([rx, ry, rw, rh]) => px >= rx && px <= rx + rw && py >= ry && py <= ry + rh);
+      if (!r) return tt;
+      const [rx, ry, rw, rh] = r;
+      const exit = dx > 0 ? rx + rw - x : dx < 0 ? x - rx : dy > 0 ? ry + rh - y : y - ry;
+      if (exit <= tt + 1e-6) return tt;
+      tt = exit;
+    }
+    return tt;
+  }
+  function aabb(it) {
+    const a = it.rot * Math.PI / 180, c = Math.abs(Math.cos(a)), s = Math.abs(Math.sin(a));
+    const hx = (c * it.L + s * it.W) / 2, hy = (s * it.L + c * it.W) / 2;
+    return [it.x - hx, it.y - hy, it.x + hx, it.y + hy];
+  }
+  function itemDist(x, y, dx, dy, boxes) {
+    let best = Infinity;
+    for (const b of boxes) {
+      let d;
+      if (dx) { if (y <= b[1] || y >= b[3]) continue; d = dx > 0 ? b[0] - x : x - b[2]; }
+      else { if (x <= b[0] || x >= b[2]) continue; d = dy > 0 ? b[1] - y : y - b[3]; }
+      if (d >= -1e-6 && d < best) best = Math.max(0, d);
+    }
+    return best;
+  }
+  const DIRS = [["left", -1, 0], ["right", 1, 0], ["up", 0, -1], ["down", 0, 1]];
+  function gapsFor(it) {
+    const [x0, y0, x1, y1] = aabb(it);
+    const boxes = items.filter(o => o !== it).map(aabb);
+    const out = { sides: {}, wall: false, item: false };
+    out.item = boxes.some(b => b[0] < x1 - 1e-3 && b[2] > x0 + 1e-3 && b[1] < y1 - 1e-3 && b[3] > y0 + 1e-3);
+    for (const [k, dx, dy] of DIRS) {
+      const a = dx ? y0 : x0, b = dx ? y1 : x1;
+      const n = Math.max(2, Math.ceil((b - a) / 0.05));
+      let best = null;
+      for (let i = 0; i <= n; i++) {
+        const sAlong = a + 0.003 + (b - a - 0.006) * i / n;
+        const px = dx ? (dx > 0 ? x1 : x0) : sAlong, py = dx ? sAlong : (dy > 0 ? y1 : y0);
+        if (!inFree(px - dx * 0.003, py - dy * 0.003)) out.wall = true;
+        const w = wallDist(px, py, dx, dy), f = itemDist(px, py, dx, dy, boxes);
+        const d = Math.min(w, f), off = Math.abs(sAlong - (a + b) / 2);
+        // Smallest gap wins; on a tie, draw it nearest the middle of the side
+        if (!best || d < best.d - 0.001 || (Math.abs(d - best.d) <= 0.001 && off < best.off)) best = { d, px, py, dx, dy, off };
+      }
+      out.sides[k] = best;
+    }
+    return out;
+  }
+  const gapRow = document.getElementById("gap-row"), gapWarn = document.getElementById("gap-warn");
+  function renderGaps(it) {
+    gGap.replaceChildren();
+    if (!it) return;
+    const G = gapsFor(it);
+    const arrows = { left: "←", right: "→", up: "↑", down: "↓" };
+    gapRow.title = t("gapsNote");
+    gapRow.innerHTML = DIRS.map(([k]) => `<span title="${esc(t("dir_" + k))}">${arrows[k]} <b>${fmt(G.sides[k].d)}</b></span>`).join("") + `<span>${esc(t("m"))}</span>`;
+    const warns = [G.wall && t("overlapWall"), G.item && t("overlapItem")].filter(Boolean);
+    gapWarn.hidden = !warns.length; gapWarn.textContent = warns.join(" · ");
+    for (const [k] of DIRS) {
+      const s = G.sides[k];
+      if (!s || s.d < 0.005 || s.d > 20) continue;
+      const ax = m(s.px), ay = m(s.py), bx = m(s.px + s.dx * s.d), by = m(s.py + s.dy * s.d);
+      el("line", { x1: ax, y1: ay, x2: bx, y2: by, class: "gap-line" }, gGap);
+      const tk = 7;
+      [[ax, ay], [bx, by]].forEach(([qx, qy]) => s.dx
+        ? el("line", { x1: qx, y1: qy - tk, x2: qx, y2: qy + tk, class: "gap-tick" }, gGap)
+        : el("line", { x1: qx - tk, y1: qy, x2: qx + tk, y2: qy, class: "gap-tick" }, gGap));
+      const mx = (ax + bx) / 2, my = (ay + by) / 2;
+      const tx = s.dx
+        ? el("text", { x: mx, y: my - 9, class: "gap-text", "text-anchor": "middle" }, gGap)
+        : el("text", { x: mx + 10, y: my + 6, class: "gap-text", "text-anchor": "start" }, gGap);
+      tx.textContent = fmt(s.d);
+    }
+  }
+
   function renderSel() {
     gSel.replaceChildren();
     const it = selected();
     inspector.hidden = !it;
     inspEmpty.hidden = !!it;
+    renderGaps(it);
     if (!it) return;
     const g = el("g", { transform: xf(it) }, gSel);
     const w = it.L * 100, h = it.W * 100;
