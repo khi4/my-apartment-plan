@@ -143,6 +143,8 @@ details.rooms > summary h2 { margin: 0; }
 .sum-meta { font-family: var(--f-mono); font-size: 12px; color: var(--mid); }
 .sum-meta::after { content: " · Show"; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 details.rooms[open] .sum-meta::after { content: " · Hide"; }
+details.rooms + details.rooms { margin-top: -36px; }
+details.rooms .method { border-top: 1px solid var(--line); padding-top: 18px; padding-bottom: 8px; }
 
 /* Room table */
 .table-scroll { overflow-x: auto; border-top: 1px solid var(--line); }
@@ -377,9 +379,10 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
     </div>
   </details>
 
+  <details class="rooms">
+    <summary><h2 id="method-h">How this plan was measured</h2><span class="sum-meta">Method, assumptions, coordinates, data</span></summary>
   <section class="method" aria-labelledby="method-h">
     <div>
-      <h2 id="method-h">How this plan was measured</h2>
       <div class="block">
         <h3>What every size means</h3>
         <p id="conv"></p>
@@ -406,6 +409,7 @@ pre { font-family: var(--f-mono); font-size: 11.5px; line-height: 1.5; max-heigh
       </div>
     </div>
   </section>
+  </details>
 </div>
 
 <script>
