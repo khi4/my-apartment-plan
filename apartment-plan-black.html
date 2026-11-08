@@ -1,7 +1,8 @@
 <meta charset="utf-8">
 <title>3-Bedroom Plan (Black)</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Scaled 2D floor plan of a 3-bedroom apartment (black version). Room sizes are clear inside dimensions in meters, measured from the inside face of one wall to the inside face of the opposite wall, copied from the developer's plan. The full method, assumptions and coordinates are in the JSON block with id plan-data. Furniture (bed, L-sofa, sofa, chair, wardrobe, table) can be sized in meters and dragged onto the plan; the layout is saved in the page's database at layouts/main. Available in English and Arabic, with white and black themes.">
+<meta name="description" content="Scaled 2D floor plan of a 3-bedroom apartment (black version). Room sizes are clear inside dimensions in meters, measured from the inside face of one wall to the inside face of the opposite wall, copied from the developer's plan. The full method, assumptions and coordinates are in the JSON block with id plan-data. Furniture can be sized in meters and dragged onto the plan. Doors, sliding doors and windows can be added on any wall line, dragged along or between walls, or removed. The layout is saved in the page's database at layouts/main. Available in English and Arabic, with white and black themes.">
+<meta name="plan:openings" content="Doors, sliding doors and windows sit on the zero-thickness wall lines. Each is stored as kind, wall direction (h|v), wall line c, and its span a1 to a2 along the wall, in meters; doors also store the hinge end and swing side.">
 <meta name="plan:furniture-units" content="Furniture length (L) and width (W) in meters; position x, y is the piece's center in plan coordinates; rot in degrees clockwise.">
 
 <meta name="plan:units" content="meters">
@@ -18,14 +19,14 @@
 <style>
 /* Layout: one drafting card (figure label, title, drawing, hint, live readout), then the room table and the method. White and black looks, switchable; English and Arabic (RTL). */
 :root {
-  --paper: #ffffff; --floor: #ffffff; --raise: #efefef; --ink: #111111; --mid: #666666; --lo: #a3a3a3; --faint: #e5e5e5; --line: #cfcfcf; --grid: rgba(0, 0, 0, 0.075); --lit: #000000; color-scheme: light;
+  --paper: #ffffff; --floor: #ffffff; --raise: #efefef; --ink: #111111; --mid: #666666; --lo: #a3a3a3; --faint: #e5e5e5; --line: #cfcfcf; --grid: rgba(0, 0, 0, 0.075); --lit: #000000; --warn: #d4321f; color-scheme: light;
   --f-display: "Barlow Condensed", "IBM Plex Sans Arabic", "Arial Narrow", "Helvetica Neue", sans-serif;
   --f-body: "IBM Plex Sans", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-mono: "IBM Plex Mono", "IBM Plex Sans Arabic", ui-monospace, "SF Mono", Menlo, monospace;
   --f-ar: "IBM Plex Sans Arabic", "Geeza Pro", "Segoe UI", Tahoma, sans-serif;
 }
 [hidden] { display: none !important; }
-:root[data-look="black"] { --paper: #0b0b0b; --floor: #0b0b0b; --raise: #1d1d1d; --ink: #ececec; --mid: #9b9b9b; --lo: #5e5e5e; --faint: #232323; --line: #2f2f2f; --grid: rgba(255, 255, 255, 0.08); --lit: #ffffff; color-scheme: dark; }
+:root[data-look="black"] { --paper: #0b0b0b; --floor: #0b0b0b; --raise: #1d1d1d; --ink: #ececec; --mid: #9b9b9b; --lo: #5e5e5e; --faint: #232323; --line: #2f2f2f; --grid: rgba(255, 255, 255, 0.08); --lit: #ffffff; --warn: #ff6a55; color-scheme: dark; }
 html { background: var(--paper); }
 
 /* Header switchers */
@@ -166,6 +167,15 @@ html[lang="ar"] .pal-h { font-family: var(--f-ar); font-size: 12px; letter-spaci
 .f-front { stroke: var(--ink); stroke-width: 4; }
 .f-rug { fill: var(--raise); fill-opacity: 0.6; stroke: var(--mid); stroke-width: 1.5; }
 .ghost { opacity: 0.65; pointer-events: none; }
+.ghost.bad { opacity: 0.25; }
+/* Doors and windows: hit strips over the wall line, swing warnings */
+.op-hit { cursor: move; touch-action: none; }
+.op-hit rect { fill: transparent; }
+.op-hit line { stroke: transparent; stroke-width: 16; }
+#plan.measuring .op-hit { pointer-events: none; }
+.swing-hit { fill: var(--warn); fill-opacity: 0.1; stroke: var(--warn); stroke-width: 2.5; stroke-dasharray: 8 5; }
+.warn.hit { color: var(--warn); }
+.act[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .sel-box { fill: none; stroke: var(--lit); stroke-width: 2; stroke-dasharray: 7 5; pointer-events: none; }
 .sel-handle { fill: var(--paper); stroke: var(--lit); stroke-width: 2.5; cursor: nwse-resize; touch-action: none; }
 .sel-text { direction: ltr; font-family: var(--f-mono); font-size: 20px; font-weight: 500; fill: var(--lit); paint-order: stroke; stroke: var(--paper); stroke-width: 7px; stroke-linejoin: round; pointer-events: none; }
@@ -640,6 +650,7 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
     "total": 111.56
   },
   "openingFormat": "geom = [wall direction h|v, wall line, wall line (the same value: walls have no thickness), opening from, opening to] in meters. Doors add [hinge at start, swing toward larger coordinate +1 or smaller -1].",
+  "editableOpenings": "The doors and windows below are the ones traced from the drawing. On the page they can be added, dragged along a wall or onto another wall, switched between door, sliding door and window, or removed. Once edited, the saved layout holds them as openings: [{kind: door|sliding|window, o: h|v wall direction, c: wall line, a1, a2: opening from and to along the wall, hs: hinge at a1, side: +1 swings toward the larger coordinate, -1 toward the smaller}], in meters. Without that list the page uses these traced ones.",
   "doors": [
     {
       "between": [
@@ -1100,6 +1111,11 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
       "id": "other",
       "en": "Other",
       "ar": "أخرى"
+    },
+    {
+      "id": "openings",
+      "en": "Doors & windows",
+      "ar": "أبواب وشبابيك"
     }
   ],
   "furniture": [
@@ -1408,6 +1424,30 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
         </div>
         <p class="small" data-i18n="inspHint">Drag to move. Drag the corner square to resize. Keys: R rotate, F flip, D duplicate, Delete remove, arrows nudge 5 cm. Hold Shift for 1 cm steps.</p>
       </div>
+      <div id="op-insp" hidden>
+        <div class="cap"><span data-i18n="selected">Selected</span><button class="add" id="op-desel" data-i18n="done">Done</button></div>
+        <div class="insp-name" id="op-name"></div>
+        <div class="dims">
+          <label><span data-i18n="widthLab">Width</span><input id="op-w" type="number" step="0.05" inputmode="decimal" dir="ltr" data-i18n-aria="opWidAria" aria-label="Width of the selected door or window in meters"></label>
+          <span data-i18n="m">m</span>
+        </div>
+        <div class="acts" id="op-kinds" role="group" data-i18n-aria="opKindAria" aria-label="Type">
+          <button class="act" data-kind="door" data-i18n="op_door">Door</button>
+          <button class="act" data-kind="sliding" data-i18n="op_sliding">Sliding door</button>
+          <button class="act" data-kind="window" data-i18n="op_window">Window</button>
+        </div>
+        <div class="acts">
+          <button class="act" id="op-hinge" data-i18n="opHinge">Hinge side</button>
+          <button class="act" id="op-swing" data-i18n="opSwing">Open other way</button>
+          <button class="act" id="op-del" data-i18n="del">Remove</button>
+        </div>
+        <div class="gaps">
+          <div class="cap"><span data-i18n="opPos">Distance to the wall ends</span></div>
+          <div class="gap-row" id="op-pos"></div>
+          <p class="warn hit" id="op-warn" hidden></p>
+        </div>
+        <p class="small" data-i18n="opHint">Drag along the wall to move it, or onto another wall.</p>
+      </div>
     </div>
     <div class="panel-sec">
       <div class="tabs" id="cat-tabs" role="tablist"></div>
@@ -1418,6 +1458,10 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
     <div class="panel-sec">
       <button class="act" id="clear-furn">Remove all furniture</button>
       <p class="small" id="furn-count">Nothing placed yet.</p>
+    </div>
+    <div class="panel-sec">
+      <button class="act" id="reset-ops">Reset doors &amp; windows</button>
+      <p class="small" id="ops-count"></p>
     </div>
   </aside>
   </div>
@@ -1484,9 +1528,9 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
       hintBlocked: "A wall is in the way. Keep pushing to go through it.",
       m: "m", m2: "m²",
       bedrooms: "bedrooms", baths: "bathrooms + guest WC", sIndoor: "m² indoor", sTerr: "m² terraces", sTotal: "m² total",
-      furniture: "Furniture", furnIntro: "Set a size in meters, then drag the piece onto the plan. Change the size and drag again for another copy.",
+      furniture: "Furniture", furnIntro: "Set a size in meters, then drag the piece onto the plan. Change the size and drag again for another copy. Doors and windows snap to the wall lines.",
       selected: "Selected", done: "Done",
-      emptySel1: "Nothing selected. Click a piece on the plan to resize, rotate, flip, duplicate or remove it.",
+      emptySel1: "Nothing selected. Click a piece, door or window on the plan to change or remove it.",
       emptySel2: "Drag a piece to move it. Drag its corner square to resize it. Moves snap to 5 cm; hold Shift for 1 cm.",
       rot: "Rotate 90°", flip: "Flip", dup: "Duplicate", del: "Remove",
       inspHint: "Drag to move. Drag the corner square to resize. Keys: R rotate, F flip, D duplicate, Delete remove, arrows nudge 5 cm. Hold Shift for 1 cm steps.",
@@ -1519,6 +1563,17 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
       hint3d: "Drag to turn · scroll or pinch to zoom · right-drag to move. Click a piece to select it.",
       zoomIn: "Zoom in", zoomOut: "Zoom out", topView: "Top view", resetView: "Reset view",
       v3Loading: "Loading the 3D view…", v3Fail: "Couldn't load the 3D view. Check your connection, then choose 3D again.",
+      op_door: "Door", op_sliding: "Sliding door", op_window: "Window",
+      widthLab: "Width", opWidAria: "Width of the selected door or window in meters", opKindAria: "Type",
+      opDragAria: n => `Drag a ${n} onto a wall line, or press Enter to add one`,
+      opHinge: "Hinge side", opSwing: "Open other way",
+      opPos: "Distance to the wall ends", opPosNote: "Clear distance from each edge of the opening to the end of its wall.",
+      opHint: "Drag along the wall to move it, or onto another wall. Keys: Delete remove, arrows slide 5 cm (Shift 1 cm), F hinge side, S open other way.",
+      swingHit: "This door hits furniture when it opens.",
+      hintOpFar: "Bring it close to a wall line to place it.", hintOpShort: "This wall is too short for it.",
+      hintOpTaken: "Another door or window is in the way.", hintOpEnd: "It's at the end of the wall.", hintOpNone: "No free wall space for it.",
+      resetOps: "Reset doors & windows", resetOpsArmed: "Click again to go back to the drawing",
+      opsDrawn: n => `${n} doors and windows, as in the drawing.`, opsEdited: n => `${n} doors and windows. Edited.`,
     },
     ar: {
       docTitle: "مسقط شقة 3 غرف نوم", eyebrow: "مسقط أفقي · بمقياس رسم · بالمتر", title: "مسقط شقة 3 غرف نوم",
@@ -1529,9 +1584,9 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
       hintBlocked: "يوجد حائط. استمر في الدفع للعبور منه.",
       m: "م", m2: "م²",
       bedrooms: "غرف نوم", baths: "حمام + دورة مياه للضيوف", sIndoor: "م² داخلي", sTerr: "م² تراسات", sTotal: "م² إجمالي",
-      furniture: "الأثاث", furnIntro: "حدّد المقاس بالمتر، ثم اسحب القطعة إلى المسقط. غيّر المقاس واسحب مرة أخرى لإضافة نسخة جديدة.",
+      furniture: "الأثاث", furnIntro: "حدّد المقاس بالمتر، ثم اسحب القطعة إلى المسقط. غيّر المقاس واسحب مرة أخرى لإضافة نسخة جديدة. الأبواب والشبابيك تلتصق بخطوط الحوائط.",
       selected: "المحدد", done: "تم",
-      emptySel1: "لا توجد قطعة محددة. اضغط على قطعة في المسقط لتغيير مقاسها أو تدويرها أو قلبها أو نسخها أو حذفها.",
+      emptySel1: "لا يوجد شيء محدد. اضغط على قطعة أو باب أو شباك في المسقط لتعديله أو حذفه.",
       emptySel2: "اسحب القطعة لتحريكها، واسحب المربع في ركنها لتغيير مقاسها. الحركة كل 5 سم، ومع Shift كل 1 سم.",
       rot: "تدوير 90°", flip: "قلب", dup: "نسخ", del: "حذف",
       inspHint: "اسحب لتحريك القطعة، واسحب المربع في ركنها لتغيير المقاس. المفاتيح: R تدوير، F قلب، D نسخ، Delete حذف، والأسهم للتحريك 5 سم. Shift للتحريك كل 1 سم.",
@@ -1564,6 +1619,17 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
       hint3d: "اسحب للتدوير · مرّر أو قرّب بإصبعين للتكبير · اسحب بالزر الأيمن للتحريك. اضغط على قطعة لتحديدها.",
       zoomIn: "تكبير", zoomOut: "تصغير", topView: "من أعلى", resetView: "إعادة الضبط",
       v3Loading: "جارٍ تحميل العرض ثلاثي الأبعاد…", v3Fail: "تعذّر تحميل العرض ثلاثي الأبعاد. تحقّق من الاتصال ثم اختر 3D مرة أخرى.",
+      op_door: "باب", op_sliding: "باب منزلق", op_window: "شباك",
+      widthLab: "العرض", opWidAria: "عرض الباب أو الشباك المحدد بالمتر", opKindAria: "النوع",
+      opDragAria: n => `اسحب ${n} إلى خط حائط، أو اضغط Enter لإضافته`,
+      opHinge: "جهة المفصلة", opSwing: "عكس اتجاه الفتح",
+      opPos: "المسافة إلى طرفي الحائط", opPosNote: "المسافة الصافية من كل طرف للفتحة إلى نهاية الحائط.",
+      opHint: "اسحبه على الحائط لتحريكه، أو إلى حائط آخر. المفاتيح: Delete حذف، والأسهم للتحريك 5 سم (Shift كل 1 سم)، F جهة المفصلة، S عكس اتجاه الفتح.",
+      swingHit: "هذا الباب يصطدم بقطعة أثاث عند فتحه.",
+      hintOpFar: "قرّبه من خط حائط لوضعه.", hintOpShort: "هذا الحائط أقصر منه.",
+      hintOpTaken: "يوجد باب أو شباك آخر في المكان.", hintOpEnd: "وصل إلى نهاية الحائط.", hintOpNone: "لا توجد مساحة فارغة على الحوائط له.",
+      resetOps: "إعادة الأبواب والشبابيك", resetOpsArmed: "اضغط مرة أخرى للرجوع إلى الرسم الأصلي",
+      opsDrawn: n => `${n} أبواب وشبابيك، كما في الرسم.`, opsEdited: n => `${n} أبواب وشبابيك، بعد التعديل.`,
     },
   };
   const lsGet = k => { try { return localStorage.getItem(k); } catch (_) { return null; } };
@@ -1592,9 +1658,10 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
 
   const layer = id => el("g", { id }, svg);
   const gOut = layer("outside"), gFloor = layer("floors"), gWall = layer("walls"), gOpen = layer("openings"),
-        gEdge = layer("edges"), gGrid = layer("grid"), gLab = layer("labels"), gFurn = layer("furniture"),
+        gEdge = layer("edges"), gGrid = layer("grid"), gLab = layer("labels"), gOpHit = layer("opening-handles"), gFurn = layer("furniture"), gConf = layer("swing-warnings"),
         gSel = layer("selection"), gGap = layer("gaps"), gGhost = layer("ghost"), gRul = layer("rulers"), gMeas = layer("measure");
   gGap.setAttribute("pointer-events", "none");
+  gConf.setAttribute("pointer-events", "none");
   gGrid.setAttribute("pointer-events", "none");
   gLab.setAttribute("class", "labels");
   gRul.setAttribute("class", "ruler");
@@ -1625,31 +1692,8 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
   // An opening removes the wall line between a1 and a2
   const erase = (o, c, a1, a2) => line(P(o, a1, c), P(o, a2, c), "erase");
 
-  D.doors.forEach(d => {
-    const [o, c, , a1, a2, hs, side] = d.geom;
-    erase(o, c, a1, a2);
-    if (d.type === "sliding") {
-      const L = a2 - a1;
-      line(P(o, a1, c - 0.03), P(o, a1 + L * 0.58, c - 0.03), "slide");
-      line(P(o, a2 - L * 0.58, c + 0.03), P(o, a2, c + 0.03), "slide");
-      return;
-    }
-    const L = a2 - a1, ha = hs ? a1 : a2, oa = hs ? a2 : a1, face = c;
-    const H = P(o, ha, face), tip = P(o, ha, face + side * L), J = P(o, oa, face);
-    const v1 = [tip[0] - H[0], tip[1] - H[1]], v2 = [J[0] - H[0], J[1] - H[1]];
-    const sweep = v1[0] * v2[1] - v1[1] * v2[0] > 0 ? 1 : 0;
-    line(H, tip, "leaf");
-    el("path", { d: `M${m(tip[0])},${m(tip[1])} A${m(L)},${m(L)} 0 0 ${sweep} ${m(J[0])},${m(J[1])}`, class: "swing" }, gOpen);
-  });
-  D.windows.forEach(w => {
-    const [o, c, , a1, a2] = w.geom;
-    erase(o, c, a1, a2);
-    line(P(o, a1, c - 0.04), P(o, a2, c - 0.04), "glass-line");
-    line(P(o, a1, c + 0.04), P(o, a2, c + 0.04), "glass-line");
-    line(P(o, a1, c), P(o, a2, c), "glass-mid");
-    line(P(o, a1, c - 0.04), P(o, a1, c + 0.04), "glass-line");
-    line(P(o, a2, c - 0.04), P(o, a2, c + 0.04), "glass-line");
-  });
+  // Doors and windows are drawn from the editable list (see "Doors and windows" below)
+  const gOps = el("g", { id: "opening-symbols" }, gOpen);
   // Open edges: no wall between two spaces, only a dashed boundary
   D.openEdges.forEach(e => {
     const [x1, y1, x2, y2] = e.line, o = y1 === y2 ? "h" : "v";
@@ -1865,6 +1909,9 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
   // =====================================================================
   const TYPES = Object.fromEntries(D.furniture.map(f => [f.type, { L: f.length, W: f.width, cat: f.category, under: !!f.under }]));
   const MIN = 0.3, MAX = 8;
+  // Doors and windows: default width and the allowed range, in meters
+  const OPK = { door: { w: 0.8, min: 0.5, max: 1.5 }, sliding: { w: 1.8, min: 0.6, max: 4 }, window: { w: 1.2, min: 0.3, max: 4 } };
+  const OP_KINDS = Object.keys(OPK);
   const r2 = v => Math.round(v * 100) / 100;
   const clampSize = v => Math.min(MAX, Math.max(MIN, r2(v)));
   const step = e => (e && e.shiftKey ? 0.01 : 0.05);
@@ -2198,10 +2245,13 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
 
   function renderSel() {
     gSel.replaceChildren();
-    const it = selected();
+    const it = selected(), op = selectedOp();
     inspector.hidden = !it;
-    inspEmpty.hidden = !!it;
+    opInsp.hidden = !op;
+    inspEmpty.hidden = !!(it || op);
     renderGaps(it);
+    renderConflicts(op);
+    if (op) renderOpSel(op);
     if (V && mode === "3d") V.syncFurniture();
     if (!it) return;
     const g = el("g", { transform: xf(it) }, gSel);
@@ -2214,7 +2264,7 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
     if (document.activeElement !== inspL) inspL.value = fmt(it.L);
     if (document.activeElement !== inspW) inspW.value = fmt(it.W);
   }
-  function select(id) { selId = id; renderSel(); }
+  function select(id) { selId = id; selOp = null; renderSel(); }
 
   function addItem(type, L, W, x, y) {
     const it = { id: newId(), type, L, W, x: r2(x), y: r2(y), rot: 0, flip: false };
@@ -2242,8 +2292,19 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
         </div>
       </div>
     </div>`;
+  const opTileHtml = k => `
+    <div class="pi" data-op="${k}" data-cat="openings">
+      <div class="thumb" tabindex="0" role="button"></div>
+      <div>
+        <div class="pi-name"><span class="pi-label"></span><button class="add" data-add-op="${k}"></button></div>
+        <div class="dims">
+          <label><span class="lab-w"></span><input type="number" id="po-${k}-w" min="${OPK[k].min}" max="${OPK[k].max}" step="0.05" inputmode="decimal" dir="ltr"></label>
+          <span class="lab-m"></span>
+        </div>
+      </div>
+    </div>`;
   palEl.innerHTML = CATS.map(c => `<div class="pal-h" data-cat="${c.id}"></div>` +
-    Object.keys(TYPES).filter(k => TYPES[k].cat === c.id).map(tileHtml).join("")).join("");
+    (c.id === "openings" ? OP_KINDS.map(opTileHtml).join("") : Object.keys(TYPES).filter(k => TYPES[k].cat === c.id).map(tileHtml).join(""))).join("");
   const LS_CAT = "apartment-plan-furniture-tab";
   const tabsEl = document.getElementById("cat-tabs"), searchEl = document.getElementById("furn-search"), palEmpty = document.getElementById("pal-empty");
   let palCat = lsGet(LS_CAT) || "all";
@@ -2253,7 +2314,8 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
     const raw = searchEl.value.trim(), q = raw.toLowerCase();
     let shown = 0;
     palEl.querySelectorAll(".pi").forEach(pi => {
-      const f = FURN[pi.dataset.type], c = CATS.find(x => x.id === f.category);
+      const k = pi.dataset.op;
+      const f = k ? { en: STR.en["op_" + k], ar: STR.ar["op_" + k], type: k, category: "openings" } : FURN[pi.dataset.type], c = CATS.find(x => x.id === f.category);
       const inCat = q || palCat === "all" || f.category === palCat;   // a search looks in every category
       const hit = !q || [f.en, f.ar, f.type, c.en, c.ar].join(" ").toLowerCase().includes(q);
       pi.hidden = !(inCat && hit);
@@ -2279,7 +2341,16 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
     palEl.querySelectorAll(".pal-h").forEach(hd => { hd.textContent = catName(hd.dataset.cat); });
     searchEl.placeholder = t("searchPh"); searchEl.setAttribute("aria-label", t("searchAria"));
     filterPalette();
-    palEl.querySelectorAll(".pi").forEach(pi => {
+    palEl.querySelectorAll(".pi[data-op]").forEach(pi => {
+      const k = pi.dataset.op, n = opName(k);
+      pi.querySelector(".pi-label").textContent = n;
+      pi.querySelector("[data-add-op]").textContent = t("add");
+      pi.querySelector(".thumb").setAttribute("aria-label", t("opDragAria", n));
+      pi.querySelector(".lab-w").textContent = t("widthLab");
+      pi.querySelector(".lab-m").textContent = t("m");
+      document.getElementById(`po-${k}-w`).setAttribute("aria-label", t("widAria", n));
+    });
+    palEl.querySelectorAll(".pi[data-type]").forEach(pi => {
       const k = pi.dataset.type, n = typeName(k);
       pi.querySelector(".pi-label").textContent = n;
       pi.querySelector("[data-add]").textContent = t("add");
@@ -2297,6 +2368,11 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
       if (document.activeElement !== wi) wi.value = fmt(palette[k][1]);
       palEl.querySelector(`[data-type="${k}"] .thumb`).innerHTML = thumbSvg(k, ...palette[k]);
     });
+    OP_KINDS.forEach(k => {
+      const wi = document.getElementById(`po-${k}-w`);
+      if (document.activeElement !== wi) wi.value = fmt(opPalette[k]);
+      palEl.querySelector(`[data-op="${k}"] .thumb`).innerHTML = thumbOp(k, opPalette[k]);
+    });
   }
   const readNum = inp => { const v = parseFloat(String(inp.value).replace(",", ".")); return isFinite(v) && v >= MIN && v <= MAX ? r2(v) : null; };
 
@@ -2312,7 +2388,7 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
   }
   const overPlan = e => { const r = (mode === "3d" ? view3d : planScroll).getBoundingClientRect(); return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom; };
 
-  palEl.querySelectorAll(".pi").forEach(pi => {
+  palEl.querySelectorAll(".pi[data-type]").forEach(pi => {
     const k = pi.dataset.type, thumb = pi.querySelector(".thumb");
     const li = document.getElementById(`pl-${k}-l`), wi = document.getElementById(`pl-${k}-w`);
     const onSize = () => {
@@ -2346,6 +2422,64 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
     });
   });
 
+  palEl.querySelectorAll(".pi[data-op]").forEach(pi => {
+    const k = pi.dataset.op, thumb = pi.querySelector(".thumb"), wi = document.getElementById(`po-${k}-w`);
+    wi.addEventListener("input", () => {
+      const v = parseFloat(String(wi.value).replace(",", "."));
+      if (isFinite(v) && v >= OPK[k].min && v <= OPK[k].max) { opPalette[k] = r2(v); thumb.innerHTML = thumbOp(k, opPalette[k]); save(); }
+    });
+    wi.addEventListener("blur", () => renderPalette());
+    const addHere = () => {
+      if (measuring) setMeasure(false);
+      const spot = freeSpot(visibleCenter(), opPalette[k]);
+      if (spot) addOp(k, spot); else showOpHint("none");
+    };
+    pi.querySelector("[data-add-op]").addEventListener("click", addHere);
+    thumb.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); addHere(); } });
+    thumb.addEventListener("pointerdown", e => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      abortDrag();
+      if (measuring) setMeasure(false);
+      const w = opPalette[k];
+      const chip = document.createElement("div");
+      chip.className = "chip"; chip.innerHTML = thumbOp(k, w);
+      document.body.appendChild(chip);
+      const ghost = el("g", { class: "ghost", style: "display:none" }, gGhost);
+      fdrag = { kind: "newOp", op: k, w, chip, ghost, pid: e.pointerId, cand: null, why: null };
+      try { thumb.setPointerCapture(e.pointerId); } catch (_) {}
+      moveNewOp(e);
+    });
+  });
+  // A new door or window follows the pointer and snaps onto the nearest wall line
+  function moveNewOp(e) {
+    const d = fdrag;
+    if (!d || d.kind !== "newOp") return;
+    d.chip.style.left = e.clientX + "px"; d.chip.style.top = e.clientY + "px";
+    const over = overPlan(e);
+    const p = !over ? null : mode === "3d" ? (V ? V.floorPoint(e) : null) : toPlan(e);
+    const sn = p ? snapOp(p, d.w, step(e), null) : null;
+    d.cand = sn && sn.ok ? sn : null;
+    const why = p ? (sn.ok ? null : sn.why) : null;
+    if (why !== d.why) { d.why = why; showOpHint(why, true); }
+    const onWall = mode !== "3d" && sn && sn.a1 != null;
+    d.chip.style.display = onWall ? "none" : "";
+    d.ghost.style.display = onWall ? "" : "none";
+    if (onWall) {
+      const op = { kind: d.op, o: sn.o, c: sn.c, a1: sn.a1, a2: sn.a2, hs: true, side: 1 };
+      fixSide(op, sn.across ? Math.sign(sn.across) : 1);
+      d.ghost.innerHTML = opSvg(op);
+      d.ghost.classList.toggle("bad", !sn.ok);
+    }
+  }
+  function endNewOp(cancel) {
+    const d = fdrag; fdrag = null;
+    if (!d) return;
+    d.chip.remove(); d.ghost.remove();
+    if (d.why) showOpHint(null);
+    if (!cancel && d.cand) addOp(d.op, d.cand);
+  }
+
   // ---- Drag lifecycle ----
   // One set of page-wide listeners ends every drag, wherever the pointer is
   // released, so a preview can never be left behind on the plan.
@@ -2354,6 +2488,13 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
     if (fdrag.kind === "new") {
       if (e && !cancel) moveNew(e);
       endNew(cancel);
+    } else if (fdrag.kind === "newOp") {
+      if (e && !cancel) moveNewOp(e);
+      endNewOp(cancel);
+    } else if (fdrag.kind === "op") {
+      const moved = fdrag.moved, why = fdrag.why; fdrag = null;
+      if (why) showOpHint(null);
+      if (moved) opsChanged();
     } else {
       const moved = fdrag.moved, wasBlocked = fdrag.blocked; fdrag = null;
       if (wasBlocked) showBlocked(false);
@@ -2369,12 +2510,13 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
     if (!fdrag || e.pointerId !== fdrag.pid) return;
     // The button is already up: the release happened somewhere we didn't hear about
     if (e.pointerType === "mouse" && e.buttons === 0) { finishDrag(null, false); return; }
-    if (fdrag.kind === "new") moveNew(e); else dragOnPlan(e);
+    if (fdrag.kind === "new") moveNew(e); else if (fdrag.kind === "newOp") moveNewOp(e); else if (fdrag.kind === "op") dragOp(e); else dragOnPlan(e);
   }, true);
   document.addEventListener("pointerup", e => { if (fdrag && e.pointerId === fdrag.pid) finishDrag(e, false); }, true);
-  document.addEventListener("pointercancel", e => { if (fdrag && e.pointerId === fdrag.pid) finishDrag(null, fdrag.kind === "new"); }, true);
-  window.addEventListener("blur", () => { if (fdrag) finishDrag(null, fdrag.kind === "new"); });
-  document.addEventListener("visibilitychange", () => { if (document.hidden && fdrag) finishDrag(null, fdrag.kind === "new"); });
+  const isNew = () => fdrag.kind === "new" || fdrag.kind === "newOp";
+  document.addEventListener("pointercancel", e => { if (fdrag && e.pointerId === fdrag.pid) finishDrag(null, isNew()); }, true);
+  window.addEventListener("blur", () => { if (fdrag) finishDrag(null, isNew()); });
+  document.addEventListener("visibilitychange", () => { if (document.hidden && fdrag) finishDrag(null, isNew()); });
 
   function moveNew(e) {
     const d = fdrag;
@@ -2471,6 +2613,7 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
   });
 
   function furnKey(e) {
+    if (selOp) return opKey(e);
     const it = selected(); if (!it) return false;
     const k = e.key, st = e.shiftKey ? 0.01 : 0.05;
     if (k === "r" || k === "R") rotate(it, 90);
@@ -2486,13 +2629,332 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
     return true;
   }
 
+  // =====================================================================
+  // Doors and windows: they sit on the wall lines. Add from the palette,
+  // drag along a wall or onto another wall, change the type, or remove.
+  // An opening: { id, kind: door|sliding|window, o: h|v, c, a1, a2, hs, side }
+  //   o: wall direction, c: the wall line, a1..a2: the span along the wall,
+  //   hs: hinge at a1 (doors), side: +1 swings toward the larger coordinate.
+  // =====================================================================
+  const opName = k => t("op_" + k);
+  const defaultOps = () => [
+    ...D.doors.map(d => ({ kind: d.type === "sliding" ? "sliding" : "door", o: d.geom[0], c: d.geom[1], a1: d.geom[3], a2: d.geom[4], hs: d.geom[5] !== false, side: d.geom[6] === 1 ? 1 : -1 })),
+    ...D.windows.map(w => ({ kind: "window", o: w.geom[0], c: w.geom[1], a1: w.geom[3], a2: w.geom[4], hs: true, side: 1 })),
+  ].map((op, i) => ({ id: "d" + i, ...op }));
+  let ops = defaultOps(), opsEdited = false, selOp = null;
+  const opPalette = Object.fromEntries(OP_KINDS.map(k => [k, OPK[k].w]));
+  const selectedOp = () => ops.find(o => o.id === selOp) || null;
+  const sameLine = (p, q) => p.o === q.o && Math.abs(p.c - q.c) < 1e-3;
+  const alongOf = (o, x, y) => o === "h" ? x : y, acrossOf = (o, x, y) => o === "h" ? y : x;
+  const insideAny = (x, y) => ROOMS.some(r => r.rect.some(([x0, y0, w, h]) => x > x0 && x < x0 + w && y > y0 && y < y0 + h));
+
+  // Wall lines an opening can sit on: indoor room edges minus the open edges,
+  // merged per line, then cut wherever another wall meets the line (open edges
+  // between hall spaces don't cut: a door may span them).
+  function baseRuns() {
+    const lines = new Map();
+    const add = (o, c, a, b) => { const k = o + "|" + c.toFixed(3); if (!lines.has(k)) lines.set(k, []); lines.get(k).push([Math.min(a, b), Math.max(a, b)]); };
+    ROOMS.filter(r => !r.outdoor).forEach(r => r.rect.forEach(([x, y, w, h]) =>
+      [[x, y, x + w, y], [x, y + h, x + w, y + h], [x, y, x, y + h], [x + w, y, x + w, y + h]].flatMap(minusOpen)
+        .forEach(([x1, y1, x2, y2]) => near(y1, y2) ? add("h", y1, x1, x2) : add("v", x1, y1, y2))));
+    const runs = [];
+    lines.forEach((iv, k) => {
+      const [o, cs] = k.split("|"), c = +cs, merged = [];
+      iv.sort((p, q) => p[0] - q[0]).forEach(([a, b]) => {
+        const last = merged[merged.length - 1];
+        if (last && a <= last[1] + 1e-6) last[1] = Math.max(last[1], b); else merged.push([a, b]);
+      });
+      merged.forEach(([a, b]) => runs.push({ o, c, a, b }));
+    });
+    return runs;
+  }
+  const SEGS = (() => {
+    const cutters = WALLS.map(([x1, y1, x2, y2]) => near(y1, y2)
+      ? { o: "h", c: y1, a: Math.min(x1, x2), b: Math.max(x1, x2) } : { o: "v", c: x1, a: Math.min(y1, y2), b: Math.max(y1, y2) });
+    return baseRuns().flatMap(r => {
+      const cuts = [...new Set(cutters.filter(q => q.o !== r.o && q.c > r.a + 1e-3 && q.c < r.b - 1e-3 && q.a <= r.c + 1e-3 && q.b >= r.c - 1e-3).map(q => r2(q.c)))].sort((p, q) => p - q);
+      const pts = [r.a, ...cuts, r.b];
+      return pts.slice(1).map((b, i) => ({ o: r.o, c: r.c, a: pts[i], b }));
+    });
+  })();
+  const segOf = op => SEGS.find(g => sameLine(g, op) && op.a1 >= g.a - 1e-3 && op.a2 <= g.b + 1e-3) || null;
+  const clashes = (cand, selfId) => ops.some(q => q.id !== selfId && sameLine(q, cand) && q.a1 < cand.a2 - 1e-3 && q.a2 > cand.a1 + 1e-3);
+
+  // Where an opening of width w lands for a pointer at p: the nearest wall segment
+  // within 0.5 m. offA shifts the along-wall position when the wall runs in offO.
+  function snapOp(p, w, st, selfId, offA = 0, offO = null) {
+    let best = null;
+    for (const g of SEGS) {
+      const al = alongOf(g.o, p.x, p.y) + (g.o === offO ? offA : 0);
+      const d = Math.hypot(acrossOf(g.o, p.x, p.y) - g.c, Math.max(0, g.a - al, al - g.b));
+      if (d <= 0.5 && (!best || d < best.d)) best = { g, d, al };
+    }
+    if (!best) return { ok: false, why: "far" };
+    const { g, al } = best, across = acrossOf(g.o, p.x, p.y) - g.c;
+    if (g.b - g.a < w - 1e-6) return { ok: false, why: "short" };
+    const a1 = r2(Math.min(g.b - w, Math.max(g.a, g.a + snapTo(al - w / 2 - g.a, st))));
+    const cand = { o: g.o, c: g.c, a1, a2: r2(a1 + w), across };
+    return clashes(cand, selfId) ? { ...cand, ok: false, why: "taken" } : { ...cand, ok: true };
+  }
+  // A free spot for a new opening near p, on any wall (for the Add button)
+  function freeSpot(p, w) {
+    const segs = SEGS.filter(g => g.b - g.a >= w - 1e-6).map(g => {
+      const al = alongOf(g.o, p.x, p.y);
+      return { g, d: Math.hypot(acrossOf(g.o, p.x, p.y) - g.c, Math.max(0, g.a - al, al - g.b)), al };
+    }).sort((u, v) => u.d - v.d);
+    for (const { g, al } of segs) {
+      const start = Math.min(g.b - w, Math.max(g.a, al - w / 2));
+      for (let k = 0; k <= 2 * Math.ceil((g.b - g.a) / 0.05); k++) {
+        const off = (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 0.05, a1 = r2(start + off);
+        if (a1 < g.a - 1e-6 || a1 + w > g.b + 1e-6) continue;
+        const cand = { o: g.o, c: g.c, a1, a2: r2(a1 + w) };
+        if (!clashes(cand, null)) return cand;
+      }
+    }
+    return null;
+  }
+  // Doors swing into a room, never out of the apartment
+  function fixSide(op, pref) {
+    let side = pref || op.side || 1;
+    const mid = (op.a1 + op.a2) / 2, q = sd => P(op.o, mid, op.c + sd * 0.2);
+    if (!insideAny(...q(side)) && insideAny(...q(-side))) side = -side;
+    op.side = side;
+  }
+
+  // ---- Drawing (SVG strings in plan units: 1 m = 100) ----
+  const lnS = (p1, p2, cls) => `<line x1="${m(p1[0])}" y1="${m(p1[1])}" x2="${m(p2[0])}" y2="${m(p2[1])}" class="${cls}"/>`;
+  function doorGeom(op) {
+    const L = op.a2 - op.a1, ha = op.hs ? op.a1 : op.a2, oa = op.hs ? op.a2 : op.a1;
+    const H = P(op.o, ha, op.c), tip = P(op.o, ha, op.c + op.side * L), J = P(op.o, oa, op.c);
+    const v1 = [tip[0] - H[0], tip[1] - H[1]], v2 = [J[0] - H[0], J[1] - H[1]];
+    return { L, H, tip, J, sweep: v1[0] * v2[1] - v1[1] * v2[0] > 0 ? 1 : 0 };
+  }
+  function opSvg(op, erase = true) {
+    const { o, c, a1, a2 } = op, L = a2 - a1;
+    let s = erase ? lnS(P(o, a1, c), P(o, a2, c), "erase") : "";
+    if (op.kind === "sliding") {
+      s += lnS(P(o, a1, c - 0.03), P(o, a1 + L * 0.58, c - 0.03), "slide") + lnS(P(o, a2 - L * 0.58, c + 0.03), P(o, a2, c + 0.03), "slide");
+    } else if (op.kind === "window") {
+      s += lnS(P(o, a1, c - 0.04), P(o, a2, c - 0.04), "glass-line") + lnS(P(o, a1, c + 0.04), P(o, a2, c + 0.04), "glass-line")
+        + lnS(P(o, a1, c), P(o, a2, c), "glass-mid")
+        + lnS(P(o, a1, c - 0.04), P(o, a1, c + 0.04), "glass-line") + lnS(P(o, a2, c - 0.04), P(o, a2, c + 0.04), "glass-line");
+    } else {
+      const g = doorGeom(op);
+      s += lnS(g.H, g.tip, "leaf") + `<path d="M${m(g.tip[0])},${m(g.tip[1])} A${m(g.L)},${m(g.L)} 0 0 ${g.sweep} ${m(g.J[0])},${m(g.J[1])}" class="swing"/>`;
+    }
+    return s;
+  }
+  // Palette picture: the symbol in a short piece of wall
+  const thumbOp = (kind, w) => {
+    const op = { kind, o: "h", c: 0, a1: 0, a2: w, hs: true, side: 1 }, stub = 0.35;
+    const h = kind === "door" ? w : 0.12, pad = 0.08;
+    const vb = [m(-stub), m(-0.12 - pad), m(w + 2 * stub), m(h + 0.12 + 2 * pad)].join(" ");
+    return `<svg viewBox="${vb}" aria-hidden="true">${lnS([-stub, 0], [0, 0], "wall")}${lnS([w, 0], [w + stub, 0], "wall")}${opSvg(op, false)}</svg>`;
+  };
+
+  // ---- Swing check: a door's quarter circle against the furniture ----
+  const inPiece = (it, x, y) => {
+    const a = it.rot * Math.PI / 180, c = Math.cos(a), s = Math.sin(a), vx = x - it.x, vy = y - it.y;
+    return Math.abs(vx * c + vy * s) < it.L / 2 - 1e-3 && Math.abs(-vx * s + vy * c) < it.W / 2 - 1e-3;
+  };
+  function swingBlocked(op) {
+    if (op.kind !== "door") return false;
+    const L = op.a2 - op.a1, ha = op.hs ? op.a1 : op.a2, dir = op.hs ? 1 : -1;
+    // u: along the wall from the hinge into the opening, v: across, into the swing
+    const inWedge = (x, y) => {
+      const u = (alongOf(op.o, x, y) - ha) * dir, v = (acrossOf(op.o, x, y) - op.c) * op.side;
+      return u > -1e-3 && v > 0.01 && u * u + v * v < L * L - 1e-4;
+    };
+    return items.some(it => {
+      if (TYPES[it.type].under) return false;
+      const corners = [[0, 0], [-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sy]) => furnToPlan(it, sx * it.L / 2, sy * it.W / 2));
+      if (corners.some(p => inWedge(...p))) return true;
+      for (let i = 1; i <= 6; i++) for (let j = 0; j <= 8; j++) {
+        const r = L * i / 6 - 0.005, a = Math.PI / 2 * j / 8;
+        const [x, y] = P(op.o, ha + dir * r * Math.cos(a), op.c + op.side * Math.max(0.011, r * Math.sin(a)));
+        if (inPiece(it, x, y)) return true;
+      }
+      return false;
+    });
+  }
+  function renderConflicts(sel) {
+    gConf.replaceChildren();
+    let selHit = false;
+    ops.forEach(op => {
+      if (!swingBlocked(op)) return;
+      if (sel && op.id === sel.id) selHit = true;
+      const g = doorGeom(op);
+      el("path", { d: `M${m(g.H[0])},${m(g.H[1])} L${m(g.tip[0])},${m(g.tip[1])} A${m(g.L)},${m(g.L)} 0 0 ${g.sweep} ${m(g.J[0])},${m(g.J[1])} Z`, class: "swing-hit" }, gConf);
+    });
+    opWarn.hidden = !selHit; opWarn.textContent = selHit ? t("swingHit") : "";
+  }
+
+  // ---- On the plan ----
+  const opInsp = document.getElementById("op-insp"), opNameEl = document.getElementById("op-name"), opW = document.getElementById("op-w");
+  const opPos = document.getElementById("op-pos"), opWarn = document.getElementById("op-warn");
+  const opsCount = document.getElementById("ops-count"), resetOpsBtn = document.getElementById("reset-ops");
+  function renderOps() {
+    gOps.innerHTML = ops.map(op => opSvg(op)).join("");
+    gOpHit.innerHTML = ops.map(op => {
+      const [x0, y0] = P(op.o, op.a1, op.c - 0.15), [x1, y1] = P(op.o, op.a2, op.c + 0.15);
+      const leaf = op.kind === "door" ? (g => lnS(g.H, g.tip, ""))(doorGeom(op)) : "";
+      return `<g class="op-hit" data-op="${op.id}"><title>${esc(opName(op.kind))} ${fmt(op.a2 - op.a1)} ${t("m")}</title><rect x="${m(x0)}" y="${m(y0)}" width="${m(x1 - x0)}" height="${m(y1 - y0)}"/>${leaf}</g>`;
+    }).join("");
+    opsCount.textContent = t(opsEdited ? "opsEdited" : "opsDrawn", ops.length);
+    resetOpsBtn.disabled = !opsEdited;
+  }
+  function renderOpSel(op) {
+    const [ax, ay] = P(op.o, op.a1 - 0.05, op.c - 0.1), [bx, by] = P(op.o, op.a2 + 0.05, op.c + 0.1);
+    el("rect", { x: m(Math.min(ax, bx)), y: m(Math.min(ay, by)), width: m(Math.abs(bx - ax)), height: m(Math.abs(by - ay)), class: "sel-box" }, gSel);
+    // Label on the side away from the swing, inside a room when possible
+    const mid = (op.a1 + op.a2) / 2;
+    let ls = op.kind === "door" ? -op.side : 1;
+    if (!insideAny(...P(op.o, mid, op.c + ls * 0.3))) ls = -ls;
+    const [tx, ty] = P(op.o, mid, op.c + ls * (op.o === "h" ? 0.32 : 0.45));
+    const txt = el("text", { x: m(tx), y: m(ty) + 7, class: "sel-text", "text-anchor": "middle", direction: "ltr" }, gSel);
+    txt.textContent = fmt(op.a2 - op.a1);
+    // Distance from each end of the opening to the end of its wall, drawn on the
+    // other side of the wall from the width label
+    const g = segOf(op), ds = -ls;
+    const ends = g ? [[g.a, op.a1], [op.a2, g.b]] : [];
+    ends.forEach(([p, q]) => {
+      if (q - p < 0.005) return;
+      const A = P(op.o, p, op.c + ds * 0.14), B = P(op.o, q, op.c + ds * 0.14);
+      el("line", { x1: m(A[0]), y1: m(A[1]), x2: m(B[0]), y2: m(B[1]), class: "gap-line" }, gGap);
+      [A, B].forEach(Q => { const [u1, u2] = [P(op.o, alongOf(op.o, ...Q), op.c + ds * 0.07), P(op.o, alongOf(op.o, ...Q), op.c + ds * 0.21)]; el("line", { x1: m(u1[0]), y1: m(u1[1]), x2: m(u2[0]), y2: m(u2[1]), class: "gap-tick" }, gGap); });
+      const M2 = P(op.o, (p + q) / 2, op.c + ds * (op.o === "h" ? 0.3 : 0.26));
+      const tt = el("text", { x: m(M2[0]), y: m(M2[1]) + 6, class: "gap-text", "text-anchor": op.o === "h" ? "middle" : ds > 0 ? "start" : "end" }, gGap);
+      tt.textContent = fmt(q - p);
+    });
+    const [lo, hi] = op.o === "h" ? ["←", "→"] : ["↑", "↓"];
+    opPos.title = t("opPosNote");
+    opPos.innerHTML = g ? `<span>${lo} <b>${fmt(op.a1 - g.a)}</b></span><span>${hi} <b>${fmt(g.b - op.a2)}</b></span><span>${esc(t("m"))}</span>` : "";
+    opNameEl.textContent = opName(op.kind);
+    if (document.activeElement !== opW) opW.value = fmt(op.a2 - op.a1);
+    opW.min = OPK[op.kind].min; opW.max = OPK[op.kind].max;
+    document.querySelectorAll("#op-kinds [data-kind]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.kind === op.kind)));
+    document.getElementById("op-hinge").hidden = document.getElementById("op-swing").hidden = op.kind !== "door";
+  }
+  function selectOp(id) { selOp = id; selId = null; renderSel(); }
+  // Any change to the doors and windows: redraw, save, and rebuild the 3D walls
+  function opsChanged() {
+    opsEdited = true;
+    renderOps(); renderSel(); save();
+    if (V) V.syncOpenings();
+  }
+  function addOp(kind, cand) {
+    const op = { id: newId(), kind, o: cand.o, c: cand.c, a1: cand.a1, a2: cand.a2, hs: true, side: 1 };
+    fixSide(op, cand.across ? Math.sign(cand.across) : 1);
+    ops.push(op); selOp = op.id; selId = null;
+    opsChanged();
+  }
+  const removeOp = op => { ops = ops.filter(o => o !== op); selOp = null; opsChanged(); };
+  function setOpKind(op, kind) {
+    if (op.kind === kind) return;
+    const w = Math.min(OPK[kind].max, Math.max(OPK[kind].min, op.a2 - op.a1));
+    const g = segOf(op), mid = (op.a1 + op.a2) / 2;
+    let a1 = r2(mid - w / 2);
+    if (g) a1 = r2(Math.min(g.b - w, Math.max(g.a, a1)));
+    if (clashes({ ...op, a1, a2: r2(a1 + w) }, op.id)) return showOpHint("taken");
+    op.kind = kind; op.a1 = a1; op.a2 = r2(a1 + w);
+    if (kind === "door") fixSide(op);
+    opsChanged();
+  }
+  function setOpWidth(op, w) {
+    const g = segOf(op), mid = (op.a1 + op.a2) / 2;
+    if (g && g.b - g.a < w - 1e-6) return showOpHint("short");
+    let a1 = r2(mid - w / 2);
+    if (g) a1 = r2(Math.min(g.b - w, Math.max(g.a, a1)));
+    if (clashes({ ...op, a1, a2: r2(a1 + w) }, op.id)) return showOpHint("taken");
+    op.a1 = a1; op.a2 = r2(a1 + w);
+    opsChanged();
+  }
+  function slideOp(op, v) {
+    const g = segOf(op), a1 = r2(op.a1 + v), a2 = r2(op.a2 + v);
+    if (g && (a1 < g.a - 1e-6 || a2 > g.b + 1e-6)) return showOpHint("end");
+    if (clashes({ ...op, a1, a2 }, op.id)) return showOpHint("taken");
+    op.a1 = a1; op.a2 = a2;
+    opsChanged();
+  }
+  const HINT_OP = { far: "hintOpFar", short: "hintOpShort", taken: "hintOpTaken", end: "hintOpEnd", none: "hintOpNone" };
+  let opHintTimer = null;
+  function showOpHint(why, stay) {
+    clearTimeout(opHintTimer);
+    if (!why) { renderHint(); return; }
+    hint.textContent = t(HINT_OP[why]);
+    if (!stay) opHintTimer = setTimeout(renderHint, 1600);
+  }
+
+  // Drag an opening on the plan
+  gOpHit.addEventListener("pointerdown", e => {
+    if (measuring || e.button !== 0) return;
+    const h = e.target.closest(".op-hit"); if (!h) return;
+    e.stopPropagation(); e.preventDefault();
+    abortDrag();
+    const op = ops.find(o => o.id === h.dataset.op); if (!op) return;
+    selectOp(op.id);
+    const p = toPlan(e);
+    fdrag = { kind: "op", op, offA: (op.a1 + op.a2) / 2 - alongOf(op.o, p.x, p.y), offO: op.o, pid: e.pointerId, moved: false };
+    try { svg.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+  function dragOp(e) {
+    const d = fdrag, op = d.op, p = toPlan(e), w = op.a2 - op.a1;
+    const sn = snapOp(p, w, step(e), op.id, d.offA, d.offO);
+    if (!sn.ok) { if (d.why !== sn.why) { d.why = sn.why; showOpHint(sn.why, true); } return; }
+    if (d.why) { d.why = null; showOpHint(null); }
+    if (sameLine(sn, op) && near(sn.a1, op.a1)) return;
+    const turned = !sameLine(sn, op);
+    Object.assign(op, { o: sn.o, c: sn.c, a1: sn.a1, a2: sn.a2 });
+    if (turned) fixSide(op);
+    d.moved = true;
+    renderOps(); renderSel();
+  }
+
+  // Inspector
+  opW.addEventListener("input", () => {
+    const op = selectedOp(); if (!op) return;
+    const v = parseFloat(String(opW.value).replace(",", "."));
+    if (isFinite(v) && v >= OPK[op.kind].min && v <= OPK[op.kind].max) setOpWidth(op, r2(v));
+  });
+  opW.addEventListener("blur", renderSel);
+  document.getElementById("op-desel").addEventListener("click", () => select(null));
+  document.getElementById("op-kinds").addEventListener("click", e => { const b = e.target.closest("[data-kind]"), op = selectedOp(); if (b && op) setOpKind(op, b.dataset.kind); });
+  const flipHinge = op => { if (op.kind === "door") { op.hs = !op.hs; opsChanged(); } };
+  const flipSwing = op => { if (op.kind === "door") { op.side = -op.side; opsChanged(); } };
+  document.getElementById("op-hinge").addEventListener("click", () => { const op = selectedOp(); if (op) flipHinge(op); });
+  document.getElementById("op-swing").addEventListener("click", () => { const op = selectedOp(); if (op) flipSwing(op); });
+  document.getElementById("op-del").addEventListener("click", () => { const op = selectedOp(); if (op) removeOp(op); });
+  let resetTimer = null;
+  const disarmReset = () => { clearTimeout(resetTimer); delete resetOpsBtn.dataset.armed; resetOpsBtn.textContent = t("resetOps"); };
+  resetOpsBtn.addEventListener("click", () => {
+    if (!opsEdited) return;
+    if (resetOpsBtn.dataset.armed) {
+      disarmReset();
+      ops = defaultOps(); selOp = null; opsChanged();
+      opsEdited = false; renderOps(); save();
+    } else { resetOpsBtn.dataset.armed = "1"; resetOpsBtn.textContent = t("resetOpsArmed"); resetTimer = setTimeout(disarmReset, 3500); }
+  });
+  function opKey(e) {
+    const op = selectedOp(); if (!op) return false;
+    const k = e.key, st = e.shiftKey ? 0.01 : 0.05;
+    const dir = { ArrowLeft: op.o === "h" ? -1 : 0, ArrowRight: op.o === "h" ? 1 : 0, ArrowUp: op.o === "v" ? -1 : 0, ArrowDown: op.o === "v" ? 1 : 0 }[k];
+    if (k === "Delete" || k === "Backspace") removeOp(op);
+    else if (k === "Escape") select(null);
+    else if (k === "f" || k === "F") flipHinge(op);
+    else if (k === "s" || k === "S") flipSwing(op);
+    else if (dir) slideOp(op, dir * st);
+    else if (dir === 0) return true;   // across the wall: no move, no page scroll
+    else return false;
+    return true;
+  }
+
   // ---- Saving: the page's shared database, or this browser as a fallback ----
   const saveEl = document.getElementById("save-status");
   let saveKey = "loading";
   const setSave = k => { saveKey = k; saveEl.textContent = t("save_" + k); };
   const LS_KEY = "apartment-plan-furniture-" + D.variant;
   let store = { mode: "pending", ref: null }, saveTimer = null, saving = false, again = false, readOnly = false;
-  const stateNow = () => JSON.parse(JSON.stringify({ v: 1, palette, items }));
+  const stateNow = () => JSON.parse(JSON.stringify({ v: 1, palette, items, opPalette, ...(opsEdited ? { openings: ops } : {}) }));
   const writeLocal = data => { try { localStorage.setItem(LS_KEY, JSON.stringify(data)); return true; } catch (_) { return false; } };
   const readLocal = () => { try { const s = localStorage.getItem(LS_KEY); return s ? JSON.parse(s) : null; } catch (_) { return null; } };
   function applyState(d) {
@@ -2508,6 +2970,19 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
         .map(i => ({ id: String(i.id || newId()).slice(0, 24), type: i.type, x: r2(i.x), y: r2(i.y), L: clampSize(i.L), W: clampSize(i.W), rot: ((+i.rot || 0) % 360 + 360) % 360, flip: !!i.flip }));
       if (!items.some(i => i.id === selId)) selId = null;
     }
+    if (d.opPalette && typeof d.opPalette === "object") OP_KINDS.forEach(k => {
+      const v = d.opPalette[k];
+      if (typeof v === "number" && v >= OPK[k].min && v <= OPK[k].max) opPalette[k] = r2(v);
+    });
+    // No saved list means the doors and windows as drawn
+    if (Array.isArray(d.openings)) {
+      ops = d.openings.filter(o => o && OPK[o.kind] && (o.o === "h" || o.o === "v") && [o.c, o.a1, o.a2].every(n => typeof n === "number" && isFinite(n)) && o.a2 > o.a1)
+        .map(o => ({ id: String(o.id || newId()).slice(0, 24), kind: o.kind, o: o.o, c: r2(o.c), a1: r2(o.a1), a2: r2(o.a2), hs: o.hs !== false, side: o.side === -1 ? -1 : 1 }));
+      opsEdited = true;
+    } else { ops = defaultOps(); opsEdited = false; }
+    if (!ops.some(o => o.id === selOp)) selOp = null;
+    renderOps();
+    if (V) V.syncOpenings();
     renderPalette(); renderItems();
   }
   function save() {
@@ -2568,35 +3043,16 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
   };
 
   // Wall runs: every indoor room edge, minus the open edges, merged per wall line
-  function wallRuns() {
-    const lines = new Map();
-    const add = (o, c, a, b) => { const k = o + "|" + c.toFixed(3); if (!lines.has(k)) lines.set(k, []); lines.get(k).push([Math.min(a, b), Math.max(a, b)]); };
-    ROOMS.filter(r => !r.outdoor).forEach(r => r.rect.forEach(([x, y, w, h]) =>
-      [[x, y, x + w, y], [x, y + h, x + w, y + h], [x, y, x, y + h], [x + w, y, x + w, y + h]].flatMap(minusOpen)
-        .forEach(([x1, y1, x2, y2]) => near(y1, y2) ? add("h", y1, x1, x2) : add("v", x1, y1, y2))));
-    const runs = [];
-    lines.forEach((iv, k) => {
-      const [o, cs] = k.split("|"), c = +cs, merged = [];
-      iv.sort((p, q) => p[0] - q[0]).forEach(([a, b]) => {
-        const last = merged[merged.length - 1];
-        if (last && a <= last[1] + 1e-6) last[1] = Math.max(last[1], b); else merged.push([a, b]);
-      });
-      // Each run grows by half a wall thickness at both ends so corners close
-      merged.forEach(([a, b]) => runs.push({ o, c, a: a - H3.t / 2, b: b + H3.t / 2 }));
-    });
-    return runs;
-  }
+  // Each run grows by half a wall thickness at both ends so corners close
+  const wallRuns = () => baseRuns().map(r => ({ ...r, a: r.a - H3.t / 2, b: r.b + H3.t / 2 }));
   // Wall pieces: full height between openings; doors leave wall above them,
   // windows leave wall above and below
   function wallPieces() {
-    const ops = [
-      ...D.doors.map(d => ({ o: d.geom[0], c: d.geom[1], a: d.geom[3], b: d.geom[4], lo: 0, hi: H3.door })),
-      ...D.windows.map(w => ({ o: w.geom[0], c: w.geom[1], a: w.geom[3], b: w.geom[4], lo: H3.sill, hi: H3.head })),
-    ];
+    const holes = ops.map(p => ({ o: p.o, c: p.c, a: p.a1, b: p.a2, lo: p.kind === "window" ? H3.sill : 0, hi: p.kind === "window" ? H3.head : H3.door }));
     const out = [];
     wallRuns().forEach(r => {
       let s = r.a;
-      ops.filter(p => p.o === r.o && near(p.c, r.c) && p.b > r.a && p.a < r.b).sort((p, q) => p.a - q.a).forEach(p => {
+      holes.filter(p => p.o === r.o && Math.abs(p.c - r.c) < 1e-3 && p.b > r.a && p.a < r.b).sort((p, q) => p.a - q.a).forEach(p => {
         if (p.a > s + 1e-6) out.push({ ...r, a: s, b: p.a, y0: 0, y1: H3.wall });
         if (p.lo > 0) out.push({ ...r, a: p.a, b: p.b, y0: 0, y1: p.lo });
         out.push({ ...r, a: p.a, b: p.b, y0: p.hi, y1: H3.wall });
@@ -2685,13 +3141,13 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
       parent.add(o); return o;
     };
     // A box from (x0..x1, y0..y1 height, z0..z1), drawn with ink outlines
-    const addBox = (x0, x1, y0, y1, z0, z1) => {
+    const addBox = (x0, x1, y0, y1, z0, z1, parent = g3, list = hits) => {
       const geo = new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0);
       const mesh = new THREE.Mesh(geo, wallMats);
       mesh.position.set((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
       const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo), M.edge);
       e.position.copy(mesh.position);
-      g3.add(mesh, e); hits.push(mesh);
+      parent.add(mesh, e); list.push(mesh);
     };
 
     // Floors: every room at exactly its clear inside size
@@ -2709,31 +3165,34 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
     addLine([V3(lift[0], lift[1], F), V3(lift[0] + lift[2], lift[1] + lift[3], F)], M.fine);
     addLine([V3(lift[0] + lift[2], lift[1], F), V3(lift[0], lift[1] + lift[3], F)], M.fine);
 
-    // Walls, no ceiling
-    const T2 = H3.t / 2;
-    wallPieces().forEach(p => p.o === "h"
-      ? addBox(p.a, p.b, p.y0, p.y1, p.c - T2, p.c + T2)
-      : addBox(p.c - T2, p.c + T2, p.y0, p.y1, p.a, p.b));
-
-    // Glass: a thin outline in each window and sliding door
-    const pane = (o, c, a1, a2, lo, hi) => {
-      const q = (a, h) => o === "h" ? V3(a, c, h) : V3(c, a, h);
-      addLine([q(a1, lo), q(a2, lo), q(a2, hi), q(a1, hi), q(a1, lo)], M.fine);
-      addLine([q((a1 + a2) / 2, lo), q((a1 + a2) / 2, hi)], M.fine);
-    };
-    D.windows.forEach(w => pane(w.geom[0], w.geom[1], w.geom[3], w.geom[4], H3.sill, H3.head));
-    // Hinged doors: the leaf and swing drawn on the floor, as in the plan
-    D.doors.forEach(d => {
-      const [o, c, , a1, a2, hs, side] = d.geom;
-      if (d.type === "sliding") { pane(o, c, a1, a2, 0, H3.door); return; }
-      const L = a2 - a1, ha = hs ? a1 : a2, oa = hs ? a2 : a1;
-      const Hp = P(o, ha, c), tip = P(o, ha, c + side * L), J = P(o, oa, c);
-      const t1 = Math.atan2(tip[1] - Hp[1], tip[0] - Hp[0]);
-      let dt = Math.atan2(J[1] - Hp[1], J[0] - Hp[0]) - t1;
-      if (dt > Math.PI) dt -= 2 * Math.PI; if (dt < -Math.PI) dt += 2 * Math.PI;
-      addLine([V3(Hp[0], Hp[1], F), V3(tip[0], tip[1], F)], M.edge);
-      addLine(Array.from({ length: 21 }, (_, i) => V3(Hp[0] + L * Math.cos(t1 + dt * i / 20), Hp[1] + L * Math.sin(t1 + dt * i / 20), F)), M.fine);
-    });
+    // Walls (no ceiling), doors and windows: rebuilt whenever the openings change
+    const T2 = H3.t / 2, opG = new THREE.Group(), wallHits = [];
+    g3.add(opG);
+    function syncOpenings() {
+      opG.children.forEach(o => o.geometry && o.geometry.dispose());
+      opG.clear(); wallHits.length = 0;
+      wallPieces().forEach(p => p.o === "h"
+        ? addBox(p.a, p.b, p.y0, p.y1, p.c - T2, p.c + T2, opG, wallHits)
+        : addBox(p.c - T2, p.c + T2, p.y0, p.y1, p.a, p.b, opG, wallHits));
+      // Glass: a thin outline in each window and sliding door
+      const pane = (o, c, a1, a2, lo, hi) => {
+        const q = (a, h) => o === "h" ? V3(a, c, h) : V3(c, a, h);
+        addLine([q(a1, lo), q(a2, lo), q(a2, hi), q(a1, hi), q(a1, lo)], M.fine, opG);
+        addLine([q((a1 + a2) / 2, lo), q((a1 + a2) / 2, hi)], M.fine, opG);
+      };
+      ops.forEach(op => {
+        if (op.kind === "window") { pane(op.o, op.c, op.a1, op.a2, H3.sill, H3.head); return; }
+        if (op.kind === "sliding") { pane(op.o, op.c, op.a1, op.a2, 0, H3.door); return; }
+        // Hinged doors: the leaf and swing drawn on the floor, as in the plan
+        const g = doorGeom(op), L = g.L;
+        const t1 = Math.atan2(g.tip[1] - g.H[1], g.tip[0] - g.H[0]);
+        let dt = Math.atan2(g.J[1] - g.H[1], g.J[0] - g.H[0]) - t1;
+        if (dt > Math.PI) dt -= 2 * Math.PI; if (dt < -Math.PI) dt += 2 * Math.PI;
+        addLine([V3(g.H[0], g.H[1], F), V3(g.tip[0], g.tip[1], F)], M.edge, opG);
+        addLine(Array.from({ length: 21 }, (_, i) => V3(g.H[0] + L * Math.cos(t1 + dt * i / 20), g.H[1] + L * Math.sin(t1 + dt * i / 20), F)), M.fine, opG);
+      });
+      need = true;
+    }
     // Open edges between spaces: dashed on the floor
     D.openEdges.forEach(e => { const [x1, y1, x2, y2] = e.line; addLine([V3(x1, y1, F), V3(x2, y2, F)], M.dash, g3, true); });
     // Terrace railings: a top rail with posts
@@ -2888,7 +3347,7 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
       view3d.classList.remove("dragging");
       if (down && down.b === 0 && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 5) {
         aim(e);
-        const h = ray.intersectObjects([...hits, ...furnG.children.filter(o => o.isMesh)], false)[0];
+        const h = ray.intersectObjects([...hits, ...wallHits, ...furnG.children.filter(o => o.isMesh)], false)[0];
         select(h && h.object.userData.id ? h.object.userData.id : null);
       }
       down = null;
@@ -2896,20 +3355,20 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
     cv.addEventListener("pointermove", e => {
       if (e.buttons) return;
       aim(e);
-      const h = ray.intersectObjects(hits, false)[0], id = h ? h.object.userData.room || null : null;
+      const h = ray.intersectObjects([...hits, ...wallHits], false)[0], id = h ? h.object.userData.room || null : null;
       const p = floorPoint(e);
       coordP = p && p.x > -1 && p.x < 15 && p.y > -1 && p.y < 12 ? p : null;
       if (id !== hotId) setHot(id); else paint();
     });
     cv.addEventListener("pointerleave", () => { view3d.classList.remove("dragging"); coordP = null; setHot(null); });
 
-    recolor(); relabel(); syncFurniture(); resize();
+    recolor(); relabel(); syncFurniture(); syncOpenings(); resize();
     const h0 = HOME(); camera.position.copy(h0.pos); controls.target.copy(h0.target); controls.update();
 
     return {
       start() { if (running) return; running = true; resize(); need = true; raf = requestAnimationFrame(frame); },
       stop() { running = false; cancelAnimationFrame(raf); },
-      recolor, relabel, paintHot, syncFurniture, floorPoint, zoom,
+      recolor, relabel, paintHot, syncFurniture, syncOpenings, floorPoint, zoom,
       setGrid(on) { gridG.visible = on; need = true; },
       reset() { fly(HOME()); }, top() { fly(TOP()); },
       center() { return { x: controls.target.x, y: controls.target.z }; },
@@ -2954,6 +3413,8 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
     renderStats(); renderTable(); renderMethod(); renderLabels(); renderHint(); paint(); redraw();
     renderPaletteText(); renderItems();
     if (!clearBtn.dataset.armed) clearBtn.textContent = t("clearAll");
+    if (!resetOpsBtn.dataset.armed) resetOpsBtn.textContent = t("resetOps");
+    renderOps();
     saveEl.textContent = t("save_" + saveKey);
     if (v3Msg.dataset.k) v3Msg.textContent = t(v3Msg.dataset.k);
     if (V) V.relabel();
@@ -2985,6 +3446,7 @@ html[lang="ar"] .l3.note span { font-family: var(--f-ar); }
   document.getElementById("btn-reset").addEventListener("click", () => V && V.reset());
 
   // ---- Start ----
+  renderOps();
   renderPalette();
   applyLang();
   paintLook();
