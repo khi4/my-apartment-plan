@@ -1,0 +1,104 @@
+/* Drafting color & typography tokens for White (light) and Black (dark) themes */
+:root {
+  --paper: #ffffff;
+  --floor: #ffffff;
+  --raise: #efefef;
+  --ink: #111111;
+  --mid: #666666;
+  --lo: #a3a3a3;
+  --faint: #e5e5e5;
+  --line: #cfcfcf;
+  --grid: rgba(0, 0, 0, 0.075);
+  --lit: #000000;
+  --warn: #d4321f;
+  color-scheme: light;
+
+  /* Semantic helper tokens derived strictly from the light palette */
+  --room-sel: rgba(0, 0, 0, 0.045);
+  --draft-fill: rgba(0, 0, 0, 0.05);
+  --hall-fill: rgba(0, 0, 0, 0.018);
+  --void-fill: rgba(0, 0, 0, 0.03);
+  --warn-tint: rgba(212, 50, 31, 0.1);
+  --backdrop: rgba(17, 17, 17, 0.42);
+  --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.14);
+
+  /* Border radii */
+  --r-xl: 18px;
+  --r-lg: 14px;
+  --r-md: 10px;
+  --r-sm: 8px;
+  --r-xs: 6px;
+  --r-pill: 999px;
+
+  /* Frosted-glass surface tokens (Light / White — specular VisionOS acrylic) */
+  --glass-bg: linear-gradient(155deg, rgba(246, 250, 253, 0.50) 0%, rgba(230, 238, 245, 0.38) 100%);
+  --glass-bg-strong: linear-gradient(155deg, rgba(250, 252, 255, 0.64) 0%, rgba(236, 242, 248, 0.52) 100%);
+  --glass-bg-subtle: rgba(255, 255, 255, 0.22);
+  --glass-bg-hover: rgba(255, 255, 255, 0.52);
+  --glass-well: rgba(15, 23, 35, 0.08);
+  --glass-input: rgba(255, 255, 255, 0.28);
+  --glass-pill: rgba(255, 255, 255, 0.30);
+  --glass-pill-active: #ffffff;
+  --glass-pill-active-ink: #151c24;
+  --glass-pill-shadow: 0 2px 8px rgba(15, 23, 35, 0.14);
+  --glass-border: rgba(255, 255, 255, 0.48);
+  --glass-border-strong: rgba(255, 255, 255, 0.72);
+  --glass-divider: rgba(255, 255, 255, 0.32);
+  --glass-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.62), 0 14px 36px -6px rgba(15, 23, 38, 0.16), 0 2px 8px -1px rgba(15, 23, 38, 0.08);
+  --glass-shadow-lg: inset 0 1px 0 0 rgba(255, 255, 255, 0.68), 0 22px 52px -10px rgba(15, 23, 38, 0.24), 0 4px 14px -2px rgba(15, 23, 38, 0.10);
+  --glass-blur: blur(28px) saturate(175%) brightness(1.08);
+  --glass-ink: #0d151e;
+  --glass-mid: #283442;
+  --glass-lo: #4a5868;
+
+  /* Typography */
+  --f-display: "Barlow Condensed", "IBM Plex Sans Arabic", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --f-body: "IBM Plex Sans", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", "IBM Plex Sans Arabic", ui-monospace, "SF Mono", Menlo, monospace;
+  --f-ar: "IBM Plex Sans Arabic", "Geeza Pro", "Segoe UI", Tahoma, sans-serif;
+}
+
+:root[data-look="black"] {
+  --paper: #0b0b0b;
+  --floor: #0b0b0b;
+  --raise: #1d1d1d;
+  --ink: #ececec;
+  --mid: #9b9b9b;
+  --lo: #5e5e5e;
+  --faint: #232323;
+  --line: #2f2f2f;
+  --grid: rgba(255, 255, 255, 0.08);
+  --lit: #ffffff;
+  --warn: #ff6a55;
+  color-scheme: dark;
+
+  /* Semantic helper tokens derived strictly from the dark palette */
+  --room-sel: rgba(255, 255, 255, 0.06);
+  --draft-fill: rgba(255, 255, 255, 0.06);
+  --hall-fill: rgba(255, 255, 255, 0.025);
+  --void-fill: rgba(255, 255, 255, 0.035);
+  --warn-tint: rgba(255, 106, 85, 0.12);
+  --backdrop: rgba(0, 0, 0, 0.68);
+  --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.55);
+
+  /* Frosted-glass surface tokens (Dark / Black — specular VisionOS acrylic) */
+  --glass-bg: linear-gradient(155deg, rgba(26, 33, 44, 0.62) 0%, rgba(16, 22, 31, 0.52) 100%);
+  --glass-bg-strong: linear-gradient(155deg, rgba(36, 45, 58, 0.74) 0%, rgba(20, 27, 38, 0.64) 100%);
+  --glass-bg-subtle: rgba(255, 255, 255, 0.08);
+  --glass-bg-hover: rgba(64, 78, 98, 0.55);
+  --glass-well: rgba(0, 0, 0, 0.28);
+  --glass-input: rgba(255, 255, 255, 0.09);
+  --glass-pill: rgba(255, 255, 255, 0.10);
+  --glass-pill-active: rgba(255, 255, 255, 0.94);
+  --glass-pill-active-ink: #12171e;
+  --glass-pill-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  --glass-border: rgba(255, 255, 255, 0.16);
+  --glass-border-strong: rgba(255, 255, 255, 0.28);
+  --glass-divider: rgba(255, 255, 255, 0.12);
+  --glass-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.18), 0 14px 36px -6px rgba(0, 0, 0, 0.52);
+  --glass-shadow-lg: inset 0 1px 0 0 rgba(255, 255, 255, 0.22), 0 24px 56px -10px rgba(0, 0, 0, 0.68);
+  --glass-blur: blur(28px) saturate(175%) brightness(0.84);
+  --glass-ink: #f4f7fb;
+  --glass-mid: #c9d4e0;
+  --glass-lo: #98a6b8;
+}
